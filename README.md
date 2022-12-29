@@ -33,7 +33,6 @@ Copy-paste your *access key* and your *secret key* into the corresponding fields
 
 All the data related to an Onshape document will be stored in a single folder in the <code>data</code> folder. After creating this folder, we can download the document:
 
-    mkdir data/tmp_doc
     python single_url_processing.py --data_folder=data/tmp_doc --collect_data=true --url=your_onshape_document_url
 
 Note: we automatically copy the entire Onshape workspace into your own documents. It is a good idea to delete this document if not needed anymore to alleviate the servers.

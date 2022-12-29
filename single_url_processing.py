@@ -971,18 +971,18 @@ if __name__ == "__main__":
 
         # DEBUG
         # normal map rendering
-        #patches = utils.load_last_faces(data_folder)
-        #normal_pixels = get_normal_map_single_mesh(patches, display, cam_pos, obj_center, up_vec)
-        #plt.gcf().subplots_adjust(wspace=0.0, hspace=0.0, left=0.0, right=1.0,
-        #                          bottom=0.0,
-        #                          top=1.0)
-        #plt.gca().imshow(normal_pixels)
-        #plt.gca().invert_yaxis()
-        #plt.axis("off")
-        #plt.gcf().set_size_inches(display[0]/100, display[1]/100)
-        #normal_map_name = os.path.join(training_data_folder, "normal_"+str(theta)+"_"+str(phi)+"_"+str(radius)+".png")
-        #plt.savefig(normal_map_name, dpi=100)
-        #plt.close(plt.gcf())
+        patches = utils.load_last_faces(data_folder)
+        normal_pixels = get_normal_map_single_mesh(patches, display, cam_pos, obj_center, up_vec)
+        plt.gcf().subplots_adjust(wspace=0.0, hspace=0.0, left=0.0, right=1.0,
+                                  bottom=0.0,
+                                  top=1.0)
+        plt.gca().imshow(normal_pixels)
+        plt.gca().invert_yaxis()
+        plt.axis("off")
+        plt.gcf().set_size_inches(display[0]/100, display[1]/100)
+        normal_map_name = os.path.join(training_data_folder, "normal_"+str(theta)+"_"+str(phi)+"_"+str(radius)+".png")
+        plt.savefig(normal_map_name, dpi=100)
+        plt.close(plt.gcf())
 
         # get opacities
         new_opacities = optimize_opacities(final_edges_dict, stylesheet, cam_pos, obj_center, up_vec, mesh, VERBOSE=False)
@@ -1042,12 +1042,12 @@ if __name__ == "__main__":
                 p.add_data("time", time_counter)
                 time_counter += time_step
             time_counter += time_step
-        npr_sketch = utils.rescale_rotate_center(npr_sketch)
+        #npr_sketch = utils.rescale_rotate_center(npr_sketch)
         npr_sketch_file_name = os.path.join(per_view_data_folder, "npr_sketch.json")
         skio.save(npr_sketch, npr_sketch_file_name)
         npr_sketch_file_name = os.path.join(per_view_data_folder, "npr_sketch.png")
         skio.save(npr_sketch, npr_sketch_file_name)
-        exit()
+        #exit()
         npr_sketch_file_name = os.path.join(per_view_data_folder, "npr_sketch.svg")
         skio.save(npr_sketch, npr_sketch_file_name)
         os.system("rsvg-convert -f pdf " + npr_sketch_file_name + " > " + npr_sketch_file_name.replace("svg", "pdf"))
@@ -1079,18 +1079,19 @@ if __name__ == "__main__":
         npr_sketch_name = os.path.join(training_data_folder, str(s_i)+".png")
         plt.savefig(npr_sketch_name, dpi=100)
         #plt.close(fig)
-        exit()
+        #exit()
         #for s in syn_sketch.strokes:
         #    l = np.array(s.linestring.linestring)
         #    plt.plot(np.array(l)[:, 0], np.array(l)[:, 1], c="black")
         #ax.set_aspect("equal")
-        npr_sketch_name = os.path.join(training_data_folder, "npr_"+str(theta)+"_"+str(phi)+"_"+str(radius)+"_professional3.png")
-        npr_sketch_name = os.path.join(training_data_folder, "npr_"+str(theta)+"_"+str(phi)+"_"+str(radius)+".png")
+        #npr_sketch_name = os.path.join(training_data_folder, "npr_"+str(theta)+"_"+str(phi)+"_"+str(radius)+"_professional3.png")
+        #npr_sketch_name = os.path.join(training_data_folder, "npr_"+str(theta)+"_"+str(phi)+"_"+str(radius)+".png")
         npr_sketch_name = os.path.join(training_data_folder, "ours_lambda1_"+str(lambda_1)+"_lambda2_"+str(lambda_2)+"_style_"+stroke_dataset_designer_name+".png")
         plt.savefig(npr_sketch_name, dpi=100)
         plt.close(fig)
         try:
-            obj_id = int(data_folder.split("/")[-1])
+            #obj_id = int(data_folder.split("/")[-1])
+            obj_id = data_folder.split("/")[-1]
             out_name = os.path.join(training_data_folder, "out_"+str(obj_id)+"_"+str(theta)+"_"+str(phi)+"_"+str(radius)+"_professional3_npr.png")
             out_name = os.path.join(training_data_folder, "out_"+str(obj_id)+"_"+str(theta)+"_"+str(phi)+"_"+str(radius)+"_npr.png")
             os.system("montage "+npr_sketch_name+" "+normal_map_name+" -tile 2x1 -geometry +0+0 "+out_name)
