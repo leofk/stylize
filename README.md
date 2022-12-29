@@ -16,6 +16,7 @@ at felix.hahnlein@inria.fr.
 
 - [SynDraw](https://gitlab.inria.fr/D3/contour-detect)
 - [Gurobi](https://www.gurobi.com/)
+- [pystrokeproc](https://gitlab.inria.fr/D3/pystrokeproc)
 
 # Script usage
 
@@ -68,10 +69,3 @@ Run the following command to perform line stylization:
 The command takes to additional input arguments.
 First, the designer name from the [OpenSketch](https://repo-sam.inria.fr/d3/OpenSketch/index.html) dataset whose stroke geometries and opacities will be used for stylization, e.g. <code>your_designer=Professional6</code>.
 Second, the stylesheet file which contains stroke statistics for stylization, e.g. <code>your_stylesheet_file=Professional6_waffle_iron.json</code>.
-
-
-# Code structure
-
-<code>onshape</code>
-
-This folder contains scripts to exchange data with onshape (download and upload).
