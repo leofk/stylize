@@ -68,4 +68,35 @@ Run the following command to perform line stylization:
 
 The command takes to additional input arguments.
 First, the designer name from the [OpenSketch](https://repo-sam.inria.fr/d3/OpenSketch/index.html) dataset whose stroke geometries and opacities will be used for stylization, e.g. <code>your_designer=Professional6</code>.
-Second, the stylesheet file which contains stroke statistics for stylization, e.g. <code>your_stylesheet_file=Professional6_waffle_iron.json</code>.
+Second, the stylesheet file which contains stroke statistics for stylization, e.g. <code>your_stylesheet_file=Professional6_v2.json</code>.
+
+## Render ablations
+
+If you want to render a sketch without construction lines, you can add the flag <code>--only_final_npr_lines=true</code> to the line generation and line selection commands.
+The rendering command stays the same:
+
+    python single_url_processing.py --data_folder=data/tmp_doc --generate_silhouette_lines=true --recompute_all_construction_lines=true --theta=your_theta_angle --phi=your_phi_angle --radius=your_radius --only_final_npr_lines=true
+    python single_url_processing.py --data_folder=data/tmp_doc  --theta=your_theta_angle --phi=your_phi_angle --radius=your_radius --declutter_construction_lines=true --only_final_npr_lines=true
+    python single_url_processing.py --data_folder=data/tmp_doc --theta=your_theta --phi=your_phi --radius=your_radius --npr_rendering=true --designer=your_designer --stylesheet_file=data/stylesheets/your_stylesheet_file --only_final_npr_lines=true
+
+This will pass through the feature lines of the BRep of the last step of the CAD program along with generated silhouette lines.
+
+The feature lines include both visible and **hidden** lines, so lines that are hidden by a surface of the object from the current viewpoint.
+To exclude also hidden lines, we can use the flag <code>--cut_non_visible_points=true</code>.
+This will give us the following commands:
+
+    python single_url_processing.py --data_folder=data/tmp_doc --generate_silhouette_lines=true --recompute_all_construction_lines=true --theta=your_theta_angle --phi=your_phi_angle --radius=your_radius --only_final_npr_lines=true --cut_non_visible_points=true
+    python single_url_processing.py --data_folder=data/tmp_doc  --theta=your_theta_angle --phi=your_phi_angle --radius=your_radius --declutter_construction_lines=true --only_final_npr_lines=true --cut_non_visible_points=true
+    python single_url_processing.py --data_folder=data/tmp_doc --theta=your_theta --phi=your_phi --radius=your_radius --npr_rendering=true --designer=your_designer --stylesheet_file=data/stylesheets/your_stylesheet_file --only_final_npr_lines=true
+
+# Quick example
+Here is the example code for the following public onshape document:
+https://cad.onshape.com/documents/ddc90f60c1fb6c7e5c2dffba/w/95f07f046d85847c01bb4428/e/645a0f04c7cc703069a977c6
+
+    python single_url_processing.py --data_folder=data/example --collect_data=true --url=https://cad.onshape.com/documents/ddc90f60c1fb6c7e5c2dffba/w/95f07f046d85847c01bb4428/e/645a0f04c7cc703069a977c6
+    python single_url_processing.py --data_folder=data/example --generate_silhouette_lines=true --recompute_all_construction_lines=true --phi=60
+    python single_url_processing.py --data_folder=data/example --phi=60 --declutter_construction_lines=true --lambda_2=0.01
+    python single_url_processing.py --data_folder=data/example --phi=60 --npr_rendering=true --stylesheet_file=data/stylesheets/Professional6_v2.json
+
+And the following image will be generated in the folder <code>data/example/60_60.0_1.4/training_data</code>:
+![alt text](data/example.png "Title")

@@ -12,7 +12,7 @@ import os
 import igl
 import imageio
 import numpy as np
-from utils import spherical_to_cartesian_coords
+#from utils import spherical_to_cartesian_coords
 
 import pygame
 from pygame.locals import *
@@ -301,10 +301,10 @@ def get_normal_map(patches, display, look_at_vec, up_vec, left_vec, eye):
 def convert_feature_lines(feature_lines):
     feature_lines_vertices = []
     feature_lines_edges = []
-    for polyline in feature_lines.values():
-        for p_id in range(len(polyline)-1):
+    for line in feature_lines:
+        for p_id in range(len(line["geometry"])-1):
             feature_lines_edges.append([len(feature_lines_vertices)+p_id, len(feature_lines_vertices)+p_id+1])
-        for p in polyline:
+        for p in line["geometry"]:
             feature_lines_vertices.append(p)
     return feature_lines_vertices, feature_lines_edges
 
@@ -352,6 +352,42 @@ def get_silhouette_points(mesh_depth, display):
             if gap > eps:
                 silhouette_points[i, j] = True
     return silhouette_points
+
+def get_per_line_visibility_scores(mesh, lines, display, cam_pos, center, up_vec):
+    if xvfb_exists():
+        vdisplay = Xvfb()
+        vdisplay.start()
+    pygame.init()
+    pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
+    eye = cam_pos + center
+    fov = 45.0
+    gluPerspective(fov, (display[0] / display[1]), 0.001, 10.0)
+    gluLookAt(eye[0], eye[1], eye[2], center[0], center[1], center[2], up_vec[0], up_vec[1], up_vec[2])
+    look_at_vec = center - eye
+    look_at_vec /= np.linalg.norm(look_at_vec)
+    left_vec = np.cross(up_vec, look_at_vec)
+    left_vec /= np.linalg.norm(left_vec)
+    #normal_pixels = get_normal_map(patches, display, look_at_vec, up_vec, left_vec, cam_pos+center)
+    prep_rendering()
+    render_mesh(mesh.vertices, [], mesh.faces)
+    mesh_depth = glReadPixels(0, 0, display[0], display[1], GL_DEPTH_COMPONENT, type=GL_FLOAT)
+    imageio.imsave(os.path.join("mesh_depth.png"), mesh_depth)
+    for line_id, line in enumerate(lines):
+        feature_lines_vertices, feature_lines_edges = convert_feature_lines(lines)
+        prep_rendering()
+        render_lines(feature_lines_vertices, feature_lines_edges)
+        line_depth = glReadPixels(0, 0, display[0], display[1], GL_DEPTH_COMPONENT, type=GL_FLOAT)
+        imageio.imsave(os.path.join("line_depth.png"), line_depth)
+        print(line_depth)
+        mask_visibile = np.logical_or(np.abs(mesh_depth-line_depth) < 1e-4,
+            line_depth < mesh_depth)
+        mask_hidden = np.logical_and(mesh_depth < line_depth,
+            mesh_depth < 1.0)
+        print(line_id, np.sum(mask_visibile)/np.sum(mask_hidden))
+    pygame.quit()
+    if xvfb_exists():
+        vdisplay.stop()
+    #return normal_pixels
 
 def render_baseline_data(display, data_folder, render_folder, last_obj_id, visibility_check=True,
                          lambda_0=-1, prefix=""):

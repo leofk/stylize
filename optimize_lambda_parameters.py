@@ -494,7 +494,7 @@ if __name__ == "__main__":
             final_edges_dict[str(edge_id)]["id"] = int(selected_stroke_ids[edge_id])
             final_edges_dict[str(edge_id)]["geometry_3d"] = list(edge["geometry"])
             final_edges_dict[str(edge_id)]["line_type"] = edge["type"]
-            final_edges_dict[str(edge_id)]["visbility_score"] = edge["visibility_score"]
+            final_edges_dict[str(edge_id)]["visibility_score"] = edge["visibility_score"]
             #final_edges_dict[str(edge_id)] = {"id": int(selected_stroke_ids[edge_id]),
             #                                  "geometry_3d": list(edge["geometry"]),
             #                                  "line_type": edge["type"]}

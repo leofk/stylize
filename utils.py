@@ -1489,8 +1489,12 @@ def cut_non_visible_points(edge, cam_pos, mesh, obj_center=None, up_vec=None, VE
         filtered_hits = []
         for hit in hits:
             hit_dist = np.linalg.norm(np.array(cam_pos) - np.array(hit))
+            if VERBOSE:
+                print(p_id, hit_dist, point_cam_dist, np.isclose(abs(hit_dist - point_cam_dist), 0.0, atol=1e-4), hit_dist<point_cam_dist)
             if (not np.isclose(abs(hit_dist - point_cam_dist), 0.0, atol=1e-4)) and hit_dist < point_cam_dist:
                 filtered_hits.append(hit)
+        if VERBOSE:
+            ps.register_point_cloud(str(p_id), np.array(hits))
         #if edge["type"] == "silhouette_line":
         #    print(len(filtered_hits))
         if len(filtered_hits) == 0 or (edge["type"] == "silhouette_line" and len(filtered_hits) <= 1):
@@ -1498,6 +1502,8 @@ def cut_non_visible_points(edge, cam_pos, mesh, obj_center=None, up_vec=None, VE
                 if len(visible_points) > 1:
                     visible_segments.append(np.array(visible_points))
                 visible_points = []
+            if VERBOSE:
+                print(p_id)
             visible_points.append(p)
             last_p_id = p_id
     if len(visible_points) > 1:

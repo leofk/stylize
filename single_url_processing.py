@@ -4,7 +4,7 @@ import utils
 from optimize_lambda_parameters import optimize_lambda_parameters
 import polyscope as ps
 import matplotlib.pyplot as plt
-from render_training_data import get_normal_map_single_mesh
+from render_training_data import get_normal_map_single_mesh, get_per_line_visibility_scores
 from time import time
 import pickle
 import json
@@ -28,24 +28,6 @@ import logging
 logging.getLogger('shapely.geos').setLevel(logging.CRITICAL)
 
 SYN_DRAW_PATH = "../contour-detect/SynDraw/build"
-url = "https://cad.onshape.com/documents/d367ed266b37f3a1ef5462aa/w/5e6a43ee9f8456db3fce6a4e/e/c8faffd9a157063dc99af4d7"
-url = "https://cad.onshape.com/documents/63f40038c26dca55a6c53c02/w/22656bce9991da1d5c0e4c6b/e/f38888867fb9df91a4a6432b"
-url = "https://cad.onshape.com/documents/0b29d71ceee12019d066d06a/w/97cfc66e2a4a871c5a3ec707/e/297f582fbbf82e52ff6940a1"
-url = "https://cad.onshape.com/documents/18fb5783f50ad5d13d27e869/w/0cb72101a287fa53afb2fcf5/e/43d4fd4e370c533f29d1d14e"
-url = "https://cad.onshape.com/documents/31ad16a2ac9d5879e25be5fa/w/f675a9b1fd12a2e6a90890ab/e/af0408c6a1bbd18f9ced216a"
-url = "https://cad.onshape.com/documents/0bffeb51edf0d1f2733fc281/w/9cd11ed9b0ce9e2bb0790783/e/139710b99b03d5e05259e254"
-url = "https://cad.onshape.com/documents/1201c07ef9e713c20218bfcf/w/aa0d25d3ccf76ef1eec62476/e/e0164170f45b3ad09ba3c65c"
-url = "https://cad.onshape.com/documents/e85e22e28b7e4d8dc83ef400/w/b0e1a9d388b5ca9d54a01268/e/77a8dc36005803cf1048f203"
-url = "https://cad.onshape.com/documents/17ad649aef5a6a47bec5166f/w/69858b29a3d75c1eb3b92402/e/72ad13d7d78d2781983bd944"
-url = "https://cad.onshape.com/documents/e85e22e28b7e4d8dc83ef400/w/b0e1a9d388b5ca9d54a01268/e/77a8dc36005803cf1048f203"
-url = "https://cad.onshape.com/documents/d367ed266b37f3a1ef5462aa/w/5e6a43ee9f8456db3fce6a4e/e/c8faffd9a157063dc99af4d7"
-url = "https://cad.onshape.com/documents/88f748065bc6a0f120c5f524/w/c9397859f709c56172774e34/e/c50716aa28a4e57c01e59024" # syn_2
-url = "https://cad.onshape.com/documents/9c195c552aef8c9dbb806390/w/f76369caecd8a82d0d768e87/e/40af4594d1aad6c9df6f709c" # syn_6
-url = "https://cad.onshape.com/documents/cb632008d5d51bd1e70464d0/w/0db63915c47a3600ab37cd7a/e/d33ec1cff423c978c188160b" # syn_5
-url = "https://cad.onshape.com/documents/df8be75389eb899e4c18a59a/w/13ec5d6e539ced409124fd99/e/28aff9b3f5bfadb68fceb473" # vacuum cleaner
-url = "https://cad.onshape.com/documents/a306bfadc5d206d179f88576/w/59a2e44a422e10e18396beda/e/fe6c785317682af8d480f0be" # power plug
-url = "https://cad.onshape.com/documents/8580b9d4966e71ff3497894a/w/96f5569496f40dc53450e745/e/ef4f3e392022ca3bb070a91b" # mug
-url = "https://cad.onshape.com/documents/7b84d9c38782448b4375ca77/w/9b024eb6739598263c1392fe/e/f71feec9e8c0e0c949b9688b" # cylinder toy example
 
 if __name__ == "__main__":
 
@@ -64,7 +46,6 @@ if __name__ == "__main__":
     theta = 60
     phi = -125
     stroke_dataset_designer_name = "student4"
-    stylesheet_designer_name = "student4"
     stroke_dataset_designer_name = "Professional6"
     stylesheet_designer_name = "Professional6"
 
@@ -288,7 +269,9 @@ if __name__ == "__main__":
         all_edges = filter_identical_bvh(all_edges, only_feature_lines or only_final_npr_lines)
         print(len(all_edges))
         #exit()
-        utils.add_visibility_label(all_edges, cam_pos, mesh, obj_center, up_vec)
+        utils.add_visibility_label(all_edges, cam_pos+obj_center, mesh, obj_center, up_vec)
+        #get_per_line_visibility_scores(mesh, all_edges, display, cam_pos, obj_center, up_vec)
+        #exit()
         unique_edges_file_name = os.path.join(per_view_data_folder, "unique_edges.json")
         unique_edges = deepcopy([{"geometry": edge["geometry"],
                                   "type": edge["type"],
@@ -372,7 +355,7 @@ if __name__ == "__main__":
                                  svg_file_name=projection_constraint_lines_file_name,
                                  title="Projection constraint lines")
             print("Plotted ", projection_constraint_lines_file_name)
-        visibility_scores = utils.compute_visibility_score(all_edges, cam_pos, mesh, obj_center, up_vec, VERBOSE=False)
+        visibility_scores = utils.compute_visibility_score(all_edges, cam_pos+obj_center, mesh, obj_center, up_vec, VERBOSE=False)
         visibility_score_file_name = os.path.join(per_view_data_folder, "visibility_scores")
         with open(visibility_score_file_name, "wb") as fp:
             np.save(fp, visibility_scores)
@@ -433,7 +416,7 @@ if __name__ == "__main__":
             final_edges_dict[str(edge_id)]["id"] = edge_id
             final_edges_dict[str(edge_id)]["geometry_3d"] = list(edge["geometry"])
             final_edges_dict[str(edge_id)]["line_type"] = edge["type"]
-            final_edges_dict[str(edge_id)]["visbility_score"] = edge["visibility_score"]
+            final_edges_dict[str(edge_id)]["visibility_score"] = edge["visibility_score"]
             #final_edges_dict[str(edge_id)] = {"id": int(edge_id),
             #                                  "geometry_3d": list(edge["geometry"]),
             #                                  "line_type": edge["type"]}
@@ -613,24 +596,42 @@ if __name__ == "__main__":
         decluttered_strokes_file_name = os.path.join(per_view_data_folder, "decluttered_lambda0_"+str(lambda_0)+".json")
         final_edges_dict = {}
         last_edge_id = 0
+        #ps.init()
+        #ps.remove_all_structures()
         for edge_id, edge in enumerate(final_edges):
             #final_edges_dict[str(edge_id)] = [int(selected_stroke_ids[edge_id]), list(edge["geometry"])]
             if cut_non_visible_points:
-                visible_segments = utils.cut_non_visible_points(edge, cam_pos, mesh, obj_center, up_vec)
+                visible_segments = utils.cut_non_visible_points(edge, cam_pos+obj_center, mesh, obj_center, up_vec)
                 for vis_seg in visible_segments:
                     final_edges_dict[str(last_edge_id)] = {"id": int(selected_stroke_ids[edge_id]),
                                                            "geometry_3d": vis_seg.tolist(),
-                                                           "line_type": edge["type"]}
+                                                           "line_type": edge["type"],
+                                                           "visibility_score": 1.0,
+                                                           "original_labels": edge["original_labels"],
+                                                           "feature_id": edge["feature_id"],
+                                                           #"geometry": edge["geometry"],
+                                                           "type": edge["type"]
+                                                           }
                     last_edge_id += 1
+                utils.plot_curves(visible_segments, name_prefix=str(edge_id)+"_")
             else:
                 final_edges_dict[str(edge_id)] = edge
                 final_edges_dict[str(edge_id)]["id"] = int(selected_stroke_ids[edge_id])
                 final_edges_dict[str(edge_id)]["geometry_3d"] = list(edge["geometry"])
                 final_edges_dict[str(edge_id)]["line_type"] = edge["type"]
-                final_edges_dict[str(edge_id)]["visbility_score"] = edge["visibility_score"]
+                final_edges_dict[str(edge_id)]["visibility_score"] = edge["visibility_score"]
                 #final_edges_dict[str(edge_id)] = {"id": int(selected_stroke_ids[edge_id]),
                 #                                  "geometry_3d": list(edge["geometry"]),
                 #                                  "line_type": edge["type"]}
+        #ps.set_ground_plane_mode("shadow_only")
+        #ps.set_navigation_style("free")
+        #ps.set_up_dir("neg_z_up")
+        #ps.look_at_dir(camera_location=cam_pos+obj_center,
+        #           target=obj_center,
+        #           up_dir=np.array([0, 0, 1]))
+
+        #ps.register_surface_mesh("mesh", mesh.vertices, mesh.faces)
+        #ps.show()
 
 
         with open(decluttered_strokes_file_name, "w") as fp:
@@ -757,7 +758,7 @@ if __name__ == "__main__":
             final_edges_dict[str(edge_id)]["id"] = int(selected_stroke_ids[edge_id])
             final_edges_dict[str(edge_id)]["geometry_3d"] = list(edge["geometry"])
             final_edges_dict[str(edge_id)]["line_type"] = edge["type"]
-            final_edges_dict[str(edge_id)]["visbility_score"] = edge["visibility_score"]
+            final_edges_dict[str(edge_id)]["visibility_score"] = edge["visibility_score"]
             #final_edges_dict[str(edge_id)] = {"id": int(selected_stroke_ids[edge_id]),
             #                                  "geometry_3d": list(edge["geometry"]),
             #                                  "line_type": edge["type"]}
