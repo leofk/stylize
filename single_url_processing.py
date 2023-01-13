@@ -4,7 +4,7 @@ import utils
 from optimize_lambda_parameters import optimize_lambda_parameters
 import polyscope as ps
 import matplotlib.pyplot as plt
-from render_training_data import get_normal_map_single_mesh, get_per_line_visibility_scores
+from render_training_data import get_normal_map_single_mesh
 from time import time
 import pickle
 import json
@@ -64,6 +64,7 @@ if __name__ == "__main__":
     parser.add_argument("--radius", default=1.4, type=float, help="Radius of camera position around the object")
     parser.add_argument("--only_feature_lines", default="false", type=str, help="Only generate intermediate feature lines")
     parser.add_argument("--only_final_npr_lines", default="false", type=str, help="Only generate feature lines from final shape and contour lines")
+    parser.add_argument("--keep_all_lines", default="false", type=str, help="Keep all lines")
     parser.add_argument("--include_fillet_lines", default="true", type=str, help="")
     parser.add_argument("--per_view_folder_prefix", default="", type=str, help="")
     parser.add_argument("--verbose", default="true", type=str, help="")
@@ -96,6 +97,7 @@ if __name__ == "__main__":
     include_fillet_lines = args.include_fillet_lines == "True" or args.include_fillet_lines == "true"
     only_feature_lines = args.only_feature_lines == "True" or args.only_feature_lines == "true"
     only_final_npr_lines = args.only_final_npr_lines == "True" or args.only_final_npr_lines == "true"
+    keep_all_lines = args.keep_all_lines == "True" or args.keep_all_lines == "true"
     verbose = args.verbose == "True" or args.verbose == "true"
     clean_rendering = args.clean_rendering == "True" or args.clean_rendering == "true"
     baseline_1 = args.baseline_1 == "True" or args.baseline_1 == "true"
@@ -270,8 +272,6 @@ if __name__ == "__main__":
         print(len(all_edges))
         #exit()
         utils.add_visibility_label(all_edges, cam_pos+obj_center, mesh, obj_center, up_vec)
-        #get_per_line_visibility_scores(mesh, all_edges, display, cam_pos, obj_center, up_vec)
-        #exit()
         unique_edges_file_name = os.path.join(per_view_data_folder, "unique_edges.json")
         unique_edges = deepcopy([{"geometry": edge["geometry"],
                                   "type": edge["type"],
@@ -518,7 +518,9 @@ if __name__ == "__main__":
         stroke_lengths /= np.max(stroke_lengths)
         #print("stroke_lengths", stroke_lengths)
         print("Decluttering ...")
-        if only_feature_lines or only_final_npr_lines:
+        if keep_all_lines:
+            selected_stroke_ids = [s.id for s_id, s in enumerate(strokes)]
+        elif only_feature_lines or only_final_npr_lines:
             selected_stroke_ids = [s.id for s_id, s in enumerate(strokes)
                                    if s.type == "feature_line" or s.type == "silhouette_line"]
         else:

@@ -70,25 +70,6 @@ The command takes to additional input arguments.
 First, the designer name from the [OpenSketch](https://repo-sam.inria.fr/d3/OpenSketch/index.html) dataset whose stroke geometries and opacities will be used for stylization, e.g. <code>your_designer=Professional6</code>.
 Second, the stylesheet file which contains stroke statistics for stylization, e.g. <code>your_stylesheet_file=Professional6_v2.json</code>.
 
-## Render ablations
-
-If you want to render a sketch without construction lines, you can add the flag <code>--only_final_npr_lines=true</code> to the line generation and line selection commands.
-The rendering command stays the same:
-
-    python single_url_processing.py --data_folder=data/tmp_doc --generate_silhouette_lines=true --recompute_all_construction_lines=true --theta=your_theta_angle --phi=your_phi_angle --radius=your_radius --only_final_npr_lines=true
-    python single_url_processing.py --data_folder=data/tmp_doc  --theta=your_theta_angle --phi=your_phi_angle --radius=your_radius --declutter_construction_lines=true --only_final_npr_lines=true
-    python single_url_processing.py --data_folder=data/tmp_doc --theta=your_theta --phi=your_phi --radius=your_radius --npr_rendering=true --designer=your_designer --stylesheet_file=data/stylesheets/your_stylesheet_file --only_final_npr_lines=true
-
-This will pass through the feature lines of the BRep of the last step of the CAD program along with generated silhouette lines.
-
-The feature lines include both visible and **hidden** lines, so lines that are hidden by a surface of the object from the current viewpoint.
-To exclude also hidden lines, we can use the flag <code>--cut_non_visible_points=true</code>.
-This will give us the following commands:
-
-    python single_url_processing.py --data_folder=data/tmp_doc --generate_silhouette_lines=true --recompute_all_construction_lines=true --theta=your_theta_angle --phi=your_phi_angle --radius=your_radius --only_final_npr_lines=true --cut_non_visible_points=true
-    python single_url_processing.py --data_folder=data/tmp_doc  --theta=your_theta_angle --phi=your_phi_angle --radius=your_radius --declutter_construction_lines=true --only_final_npr_lines=true --cut_non_visible_points=true
-    python single_url_processing.py --data_folder=data/tmp_doc --theta=your_theta --phi=your_phi --radius=your_radius --npr_rendering=true --designer=your_designer --stylesheet_file=data/stylesheets/your_stylesheet_file --only_final_npr_lines=true
-
 # Quick example
 Here is the example code for the following public onshape document:
 https://cad.onshape.com/documents/ddc90f60c1fb6c7e5c2dffba/w/95f07f046d85847c01bb4428/e/645a0f04c7cc703069a977c6
@@ -100,3 +81,56 @@ https://cad.onshape.com/documents/ddc90f60c1fb6c7e5c2dffba/w/95f07f046d85847c01b
 
 And the following image will be generated in the folder <code>data/example/60_60.0_1.4/training_data</code>:
 ![alt text](data/example.png "Title")
+
+# Render ablations
+
+## No construction lines
+If you want to render a sketch without construction lines, you can add the flag <code>--only_final_npr_lines=true</code> to the line generation and line selection commands.
+The rendering command stays the same:
+
+    python single_url_processing.py --data_folder=data/tmp_doc --generate_silhouette_lines=true --recompute_all_construction_lines=true --theta=your_theta_angle --phi=your_phi_angle --radius=your_radius --only_final_npr_lines=true
+    python single_url_processing.py --data_folder=data/tmp_doc  --theta=your_theta_angle --phi=your_phi_angle --radius=your_radius --declutter_construction_lines=true --only_final_npr_lines=true
+    python single_url_processing.py --data_folder=data/tmp_doc --theta=your_theta --phi=your_phi --radius=your_radius --npr_rendering=true --designer=your_designer --stylesheet_file=data/stylesheets/your_stylesheet_file --only_final_npr_lines=true
+
+This will pass through the feature lines of the BRep of the last step of the CAD program along with generated silhouette lines.
+
+## No hidden lines
+The feature lines include both visible and **hidden** lines, so lines that are hidden by a surface of the object from the current viewpoint.
+To exclude also hidden lines, we can use the flag <code>--cut_non_visible_points=true</code>.
+This will give us the following commands:
+
+    python single_url_processing.py --data_folder=data/tmp_doc --generate_silhouette_lines=true --recompute_all_construction_lines=true --theta=your_theta_angle --phi=your_phi_angle --radius=your_radius --only_final_npr_lines=true --cut_non_visible_points=true
+    python single_url_processing.py --data_folder=data/tmp_doc  --theta=your_theta_angle --phi=your_phi_angle --radius=your_radius --declutter_construction_lines=true --only_final_npr_lines=true --cut_non_visible_points=true
+    python single_url_processing.py --data_folder=data/tmp_doc --theta=your_theta --phi=your_phi --radius=your_radius --npr_rendering=true --designer=your_designer --stylesheet_file=data/stylesheets/your_stylesheet_file --only_final_npr_lines=true
+
+## All construction lines
+If you want to keep all generated lines, use the flag <code>--keep_all_lines=true</code> in the line selection step:
+
+    python single_url_processing.py --data_folder=data/tmp_doc  --theta=your_theta_angle --phi=your_phi_angle --radius=your_radius --declutter_construction_lines=true --lambda_1=your_lambda_1 --lambda_2=your_lambda_2 --keep_all_lines=true
+
+# Exports
+
+## Export in OpenSketch format
+
+By default, the sketch will also be exported in the OpenSketch format to the following location:
+<code>data/your_doc_name/theta_phi_radius/npr_sketch.json</code>.
+
+## Export 3D lines as obj file
+
+The following script will export feature lines and feature faces for all steps of the CAD sequence and the selected lines as OBJ files in the object folder.
+
+    python export_3d_data.py --folder=data/tmp_doc --theta=your_theta --phi=your_phi --radius=your_radius
+
+The sketch lines will be stored in the view folder under <code>final_edges.obj</code>.
+The script also saves camera information for the scene to be opened in Blender.
+The following command will open these OBJ files in a Blender scene with the corresponding camera.
+
+    /Applications/Blender.app/Contents/MacOS/Blender -P blender_result.py -- data/tmp_doc your_theta your_phi your_radius
+
+## Export Stroke attributes
+
+The following script will colored SVG lines in the view_folder with the file name <code>strokes_attribute.svg</code>.
+
+    python export_stroke_attributes.py --folder=data/tmp_doc --theta=your_theta --phi=your_phi --radius=your_radius --feature=your_feature
+
+where <code>your_feature</code> can be either <code>feature_id</code> or <code>line_type</code>.
