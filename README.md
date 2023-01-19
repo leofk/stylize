@@ -146,6 +146,6 @@ Since we need to query geometry information between features, we upload each new
 
 Communication with onshape is performed by using their [REST API](https://onshape-public.github.io/docs/). The template files come from feature files obtained using the [GET features](https://onshape-public.github.io/docs/featureaccess/) command. Examining these feature files will allow you to extend the functionalities of CAD2Sketch to new features.
 
-# Important Note
+## Important Note
 Because of our workspace copy calls, our data generation process overloads the Onshape servers and we have been advised not to use this procedure anymore.
 For now, we do not advise you to use this script to generate automatically large training datasets. Otherwise, your account might get blocked.
