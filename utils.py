@@ -33,7 +33,6 @@ from skspatial.objects import Line, Points, Plane
 from trimesh.intersections import mesh_plane
 import trimesh
 from sklearn.neighbors import NearestNeighbors
-#from pystrokeproc.sketch_core import Sketch, Stroke, StrokePoint
 
 
 class Stroke:

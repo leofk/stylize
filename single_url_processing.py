@@ -20,7 +20,7 @@ from copy import deepcopy
 from render_shapes import features_lines_to_svg, typed_feature_lines_to_svg, \
     typed_feature_lines_to_svg_successive, indexed_lines_to_svg
 from line_rendering import geometry_match, match_strokes, get_stroke_dataset, subdivide_long_curves, perturbate_sketch, get_opacity_profiles
-from pystrokeproc.sketch_io import SketchSerializer as skio
+from pylowstroke.sketch_io import SketchSerializer as skio
 from get_best_viewpoint import get_best_viewpoint
 sys.setrecursionlimit(10000)
 
@@ -405,7 +405,6 @@ if __name__ == "__main__":
         else:
             stroke_dataset = get_stroke_dataset(stroke_dataset_designer_name)
             for s in stroke_dataset:
-                del s.fitter
                 if s.is_ellipse():
                     continue
             with open(stroke_dataset_name, "wb") as fp:
@@ -455,10 +454,6 @@ if __name__ == "__main__":
         plt.savefig(npr_sketch_name, dpi=100)
         plt.close(fig)
         with open(os.path.join(training_data_folder, "npr_sketch_full.pkl"), "wb") as fp:
-            for s in npr_sketch.intersection_graph.strokes:
-                s.fitter = None
-            for s in npr_sketch.strokes:
-                s.fitter = None
             pickle.dump(npr_sketch, fp)
 
     if declutter_construction_lines:
@@ -776,7 +771,6 @@ if __name__ == "__main__":
         else:
             stroke_dataset = get_stroke_dataset(stroke_dataset_designer_name)
             for s in stroke_dataset:
-                del s.fitter
                 if s.is_ellipse():
                     continue
             with open(stroke_dataset_name, "wb") as fp:
@@ -946,10 +940,6 @@ if __name__ == "__main__":
                 stroke_dataset = pickle.load(fp)
         else:
             stroke_dataset = get_stroke_dataset(stroke_dataset_designer_name)
-            for s in stroke_dataset:
-                del s.fitter
-                if s.is_ellipse():
-                    continue
             with open(stroke_dataset_name, "wb") as fp:
                 pickle.dump(stroke_dataset, fp)
 
@@ -1126,10 +1116,6 @@ if __name__ == "__main__":
                 stroke_dataset = pickle.load(fp)
         else:
             stroke_dataset = get_stroke_dataset(stroke_dataset_designer_name)
-            for s in stroke_dataset:
-                del s.fitter
-                if s.is_ellipse():
-                    continue
             with open(stroke_dataset_name, "wb") as fp:
                 pickle.dump(stroke_dataset, fp)
 

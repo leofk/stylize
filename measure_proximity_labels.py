@@ -1,6 +1,6 @@
 import os, json
-from pystrokeproc.sketch_core import Sketch, Stroke, StrokePoint
-from pystrokeproc.sketch_io import SketchSerializer as skio
+from pylowstroke.sketch_core import Sketch, Stroke, StrokePoint
+from pylowstroke.sketch_io import SketchSerializer as skio
 import matplotlib.pyplot as plt
 import numpy as np
 

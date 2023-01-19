@@ -16,7 +16,7 @@ at felix.hahnlein@inria.fr.
 
 - [SynDraw](https://gitlab.inria.fr/D3/contour-detect)
 - [Gurobi](https://www.gurobi.com/)
-- [pystrokeproc](https://gitlab.inria.fr/D3/pystrokeproc)
+- [pylowstroke](https://gitlab.inria.fr/D3/pylowstroke)
 
 # Script usage
 

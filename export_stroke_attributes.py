@@ -1,8 +1,8 @@
 import argparse, os, json
 import numpy as np
 from utils import load_last_mesh, get_cam_pos_obj_center, project_points
-from pystrokeproc.sketch_core import Sketch, Stroke
-from pystrokeproc.sketch_io import SketchSerializer as sk_io
+from pylowstroke.sketch_core import Sketch, Stroke
+from pylowstroke.sketch_io import SketchSerializer as sk_io
 import seaborn as sns
 
 parser = argparse.ArgumentParser()

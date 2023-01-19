@@ -1,10 +1,10 @@
-from pystrokeproc.sketch_io import SketchSerializer as skio
+from pylowstroke.sketch_io import SketchSerializer as skio
 import imageio
 from skimage.measure import EllipseModel
 from rdp import rdp
 from trimesh.registration import procrustes
 import cv2
-from pystrokeproc.sketch_core import StrokePoint, Stroke
+from pylowstroke.sketch_core import StrokePoint, Stroke
 import seaborn as sns
 from render_training_data import project_lines_opengl
 from fitCurves import fitCurve, computeMaxError, chordLengthParameterize, generate_bezier_without_tangents
@@ -15,7 +15,7 @@ from shapely.geometry import MultiPoint, LineString, Point
 from utils import project_points
 import json
 from copy import deepcopy
-from pystrokeproc.sketch_core import Stroke, StrokePoint, Sketch
+from pylowstroke.sketch_core import Stroke, StrokePoint, Sketch
 import numpy as np
 import os, sys
 import matplotlib.pyplot as plt
@@ -870,9 +870,6 @@ def perturbate_sketch(sketch):
         #s.points_list[0].set_coords(new_s_pts[0][0], new_s_pts[0][1])
         #s.points_list[1].set_coords(new_s_pts[1][0], new_s_pts[1][1])
         sketch.strokes[s_id].add_avail_data("pressure")
-    #sketch.fit_strokes()
-    for s in sketch.strokes:
-        s.fitter = None
     return sketch
 
 if __name__ == "__main__":
@@ -882,7 +879,6 @@ if __name__ == "__main__":
     stroke_dataset = get_stroke_dataset(stroke_dataset_designer_name)
     stroke_dataset_name = os.path.join("data/stroke_datasets", stroke_dataset_designer_name+".pkl")
     for s in stroke_dataset:
-        del s.fitter
         if s.is_ellipse():
             continue
     with open(stroke_dataset_name, "wb") as fp:

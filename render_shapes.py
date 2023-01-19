@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import polyscope as ps
 import pyrr
 from svgpathtools import wsvg, Path, Line
-from pystrokeproc.sketch_io import SketchSerializer as sk_io
-from pystrokeproc.sketch_core import Sketch, Stroke
+from pylowstroke.sketch_io import SketchSerializer as sk_io
+from pylowstroke.sketch_core import Sketch, Stroke
 from utils import spherical_to_cartesian_coords
 
 def lookAt(center, target, up):

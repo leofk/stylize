@@ -19,7 +19,7 @@ from copy import deepcopy
 from render_shapes import features_lines_to_svg, typed_feature_lines_to_svg, \
     typed_feature_lines_to_svg_successive, indexed_lines_to_svg
 from line_rendering import geometry_match, match_strokes, get_stroke_dataset, subdivide_long_curves, perturbate_sketch, get_opacity_profiles
-from pystrokeproc.sketch_io import SketchSerializer as skio
+from pylowstroke.sketch_io import SketchSerializer as skio
 sys.setrecursionlimit(10000)
 
 import logging
