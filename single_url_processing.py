@@ -1079,8 +1079,12 @@ if __name__ == "__main__":
                         [s.points_list[p_id].coords[1], s.points_list[p_id+1].coords[1]],
                         c=(0, 0, 0, min(1.0, pressure)),
                         lw=pen_width*pressure)
-        npr_sketch_name = os.path.join(training_data_folder, str(s_i)+".png")
+        obj_id = data_folder.split("/")[-1]
+        npr_sketch_name = os.path.join(training_data_folder, "npr_"+str(obj_id)+"_"+str(theta)+"_"+str(phi)+"_"+str(radius)+".png")
+        npr_sketch_name = os.path.join("only_visible_sketches", "npr_"+str(obj_id)+"_"+str(theta)+"_"+str(phi)+"_"+str(radius)+".png")
+        #npr_sketch_name = os.path.join(training_data_folder, str(s_i)+".png")
         plt.savefig(npr_sketch_name, dpi=100)
+        print("saved sketch in ", npr_sketch_name)
         #plt.close(fig)
         #exit()
         #for s in syn_sketch.strokes:

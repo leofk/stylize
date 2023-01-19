@@ -324,7 +324,6 @@ def feature_lines_file_to_svg(feature_lines_file, radius=1, theta=65, phi=35):
 
 
 if __name__ == "__main__":
-    print("lol")
     sketch = sk_io.load("../sketches_json_first_viewpoint/student9/bumps/view1_concept.json")
     for s_id in range(len(sketch.strokes)):
         sketch.strokes[s_id].set_width(5.0)

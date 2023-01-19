@@ -37,7 +37,6 @@ features_cmap = {}
 for feat_id,feat in enumerate(all_features):
     features_cmap[feat] = str(cmap[feat_id])
 
-
 projected_edges = project_points(lines_3d, cam_pos, obj_center, up_vec)
 strokes = []
 for edge_id, edge in enumerate(projected_edges):
