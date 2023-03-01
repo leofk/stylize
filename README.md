@@ -3,7 +3,7 @@
 This is the official repository for the publication [CAD2Sketch: Generating Concept Sketches from CAD Sequences](https://ns.inria.fr/d3/cad2sketch/).
 
 If you should encounter any problems with the code, don't hesitate to contact me
-at felix.hahnlein@inria.fr.
+at fhahnlei@cs.washington.edu
 
 # Installation
 
