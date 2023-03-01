@@ -147,7 +147,7 @@ where <code>your_feature</code> can be either <code>feature_id</code> or <code>l
 Because of our workspace copy calls, the following data generation process overloads the Onshape servers and we have been advised not to use this procedure anymore.
 For now, we do not advise you to use this script to generate automatically large training datasets. Otherwise, your account might get blocked.
 
-![Here](https://repo-sam.inria.fr/d3/cad2sketch/cad2sketch_dataset.gz) is the dataset generated for the normal map prediction task. Don't hesitate to use it.
+[Here](https://repo-sam.inria.fr/d3/cad2sketch/cad2sketch_dataset.gz) is the dataset generated for the normal map prediction task. Don't hesitate to use it.
 
 ## Data generation procedure
 
