@@ -975,7 +975,8 @@ def generate_silhouette_lines(curved_surfaces_per_feature_id, syn_draw_path,
             mesh_file_path = os.path.join(syn_draw_path, "curved_surface_mesh"+rnd_name+".obj")
             with open(mesh_file_path, "w") as fp:
                 fp.write(obj_file_content)
-            with open(os.path.join(syn_draw_path, "../cam_smooth.properties"), "r") as fp:
+            #with open(os.path.join(syn_draw_path, "../cam_smooth.properties"), "r") as fp:
+            with open(os.path.join("./cam_smooth.properties"), "r") as fp:
                 cam_properties = fp.readlines()
             new_cam_properties = ""
             for l in cam_properties:
