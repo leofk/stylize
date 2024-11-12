@@ -1,25 +1,19 @@
 from pylowstroke.sketch_io import SketchSerializer as skio
 import imageio
 from skimage.measure import EllipseModel
-from rdp import rdp
 from trimesh.registration import procrustes
 import cv2
 from pylowstroke.sketch_core import StrokePoint, Stroke
 import seaborn as sns
-from render_training_data import project_lines_opengl
-from fitCurves import fitCurve, computeMaxError, chordLengthParameterize, generate_bezier_without_tangents
+from fitCurves import fitCurve, chordLengthParameterize, generate_bezier_without_tangents
 from bezier import q as eval_bezier
-from svgpathtools import svg2paths, wsvg
-from time import time
 from shapely.geometry import MultiPoint, LineString, Point
-from utils import project_points
 import json
 from copy import deepcopy
 from pylowstroke.sketch_core import Stroke, StrokePoint, Sketch
 import numpy as np
 import os, sys
 import matplotlib.pyplot as plt
-import utils
 sys.setrecursionlimit(10000)
 
 # go from our labels to overshooting categories

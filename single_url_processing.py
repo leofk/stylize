@@ -1,29 +1,11 @@
-from distutils.command.clean import clean
-from pyrr import Matrix44
-import utils
-from optimize_lambda_parameters import optimize_lambda_parameters
-import polyscope as ps
-import matplotlib.pyplot as plt
-from render_training_data import get_normal_map_single_mesh
 from time import time
 import pickle
 import json
-import numpy as np
 import os, sys
-from get_intermediate_shapes import get_intermediate_shapes
 from opacity_optimization import optimize_opacities
-from onshape.call import delete_document
-from draw_extrude import draw_extrude
-from prepare_decluttering import filter_identical, filter_identical_bvh, prepare_decluttering_v2, extract_strokes_dict
-from declutter_gurobi import declutter
-from copy import deepcopy
-from render_shapes import features_lines_to_svg, typed_feature_lines_to_svg, \
-    typed_feature_lines_to_svg_successive, indexed_lines_to_svg
-from line_rendering import geometry_match, match_strokes, get_stroke_dataset, subdivide_long_curves, perturbate_sketch, get_opacity_profiles
+from line_rendering import geometry_match, match_strokes, get_stroke_dataset, perturbate_sketch, get_opacity_profiles
 from pylowstroke.sketch_io import SketchSerializer as skio
-from get_best_viewpoint import get_best_viewpoint
 sys.setrecursionlimit(10000)
-import shutil
 import logging
 logging.getLogger('shapely.geos').setLevel(logging.CRITICAL)
 import argparse
@@ -111,17 +93,10 @@ if __name__ == "__main__":
     print("NPR_RENDERING")
     start_time = time()
 
-    # final_edges_file_name = os.path.join(data_folder, edge_data)
-    # final_edges_file_name = os.path.join(data_folder, file_name + ".json")
     final_edges_file_name = os.path.join(input_dir, file_name + ".json")
     sketch_data = modify_json(final_edges_file_name)
     sketch_dimensions = (sketch_data["canvas_width"], sketch_data["canvas_height"])
     final_edges_dict = sketch_data["strokes"]
-    
-    # with open(final_edges_file_name, "r") as fp:
-    #     sketch_data = json.load(fp)
-    #     sketch_dimensions = (sketch_data["canvas_width"], sketch_data["canvas_height"])
-    #     final_edges_dict = sketch_data["strokes"]
     
     style_sheet_file_name = os.path.join("data/stylesheets", stylesheet_name+".json")
     with open(style_sheet_file_name, "r") as fp:
