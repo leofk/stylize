@@ -36,9 +36,12 @@ if __name__ == "__main__":
     parser.add_argument("--data_file", default="", type=str, help="data_file path")
     parser.add_argument("--designer", default="Professional6", type=str, help="For style")
     parser.add_argument("--stylesheet_file", default="", type=str, help="stylesheet file path")
+    parser.add_argument("--match_stroke_length", default="True", type=str, help="Render drawing in a concept sketch style")
+
     args = parser.parse_args()
 
 
+    match_stroke_length = args.match_stroke_length == "True"
     style_sheet_file_name = args.stylesheet_file
     stroke_dataset_designer_name = args.designer
     data_folder = args.data_folder
