@@ -158,6 +158,7 @@ if __name__ == "__main__":
         # stroke.svg_color = f"rgb({random.randint(0, 255)}, {random.randint(0, 255)}, {random.randint(0, 255)})"
         stroke.width = 2
 
+    os.makedirs(output_dir, exist_ok=True)
     out_npr_name = "npr_" + file_name + ".svg"
     npr_sketch_file_name = os.path.join(output_dir, out_npr_name)
     skio.save(npr_sketch, npr_sketch_file_name)
