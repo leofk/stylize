@@ -28,47 +28,102 @@ import logging
 logging.getLogger('shapely.geos').setLevel(logging.CRITICAL)
 import argparse
 
+import json
+from collections import defaultdict
+import os
+
+def modify_json(input_file_path):
+    with open(input_file_path, 'r') as file:
+        data = json.load(file)
+
+        points = data.get("points", [])
+        canvas_width = data["canvas"]["width"]
+        canvas_height = data["canvas"]["height"]
+
+        new_json_structure = {}
+        stroke_dict = defaultdict(list)
+
+        for point in points:
+            stroke_dict[point["stroke_id"]].append(point)
+
+        for stroke_id, points_list in stroke_dict.items():
+            geometry = []
+            for point in points_list:
+                x = (point["x"] + 1.0) / 2.0 * canvas_width
+                y = canvas_height - ((-point["y"] + 1.0) / 2.0 * canvas_height)
+                geometry.append([x, y])
+
+            stroke_type = "silhouette_line"  # Modify if needed
+            line_type = "silhouette_line"    # Modify if needed
+            feature_id = 1
+            labels = [{"type": stroke_type, "feature_id": feature_id}]
+            visibility_score = 1.0
+            stroke_id_str = str(stroke_id)  
+
+            new_json_structure[stroke_id_str] = {
+                "geometry": geometry,
+                "type": stroke_type,
+                "feature_id": feature_id,
+                "original_labels": labels,
+                "visibility_score": visibility_score,
+                "id": stroke_id,
+                "line_type": line_type
+            }
+
+    final_output_structure = {
+        "canvas_width": canvas_width,
+        "canvas_height": canvas_height,
+        "strokes": new_json_structure
+    }
+
+    return final_output_structure
+
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_folder", default="", type=str, help="data_folder path")
     parser.add_argument("--data_file", default="", type=str, help="data_file path")
+    
     parser.add_argument("--designer", default="Professional6", type=str, help="For style")
-    parser.add_argument("--stylesheet_file", default="", type=str, help="stylesheet file path")
+    parser.add_argument("--stylesheet_name", default="", type=str, help="stylesheet file path")
     parser.add_argument("--match_stroke_length", default="True", type=str, help="Render drawing in a concept sketch style")
+    
+    parser.add_argument("--output_dir",  default="", type=str, help="data_folder path")
+    parser.add_argument("--input_dir",  default="", type=str, help="data_folder path")
+    parser.add_argument("--file_name",  default="", type=str, help="data_folder path")
 
     args = parser.parse_args()
 
 
     match_stroke_length = args.match_stroke_length == "True"
-    style_sheet_file_name = args.stylesheet_file
+    stylesheet_name = args.stylesheet_name
     stroke_dataset_designer_name = args.designer
+
     data_folder = args.data_folder
     edge_data = args.data_file
 
-    obj_data_name = os.path.splitext(os.path.basename(edge_data))[0]
+    output_dir = args.output_dir
+    input_dir = args.input_dir
+    file_name = args.file_name
 
-    # per_view_data_folder = os.path.join(data_folder, edge_data)
-    # if not os.path.exists(per_view_data_folder):
-    #     os.mkdir(per_view_data_folder)
-    per_view_data_folder = data_folder
-
-    # training_data_folder = os.path.join(per_view_data_folder, "training_data")
-    # if not os.path.exists(training_data_folder):
-    #     os.mkdir(training_data_folder)
-    training_data_folder = per_view_data_folder
 
     print("NPR_RENDERING")
     start_time = time()
 
-    final_edges_file_name = os.path.join(data_folder, edge_data)
+    # final_edges_file_name = os.path.join(data_folder, edge_data)
+    # final_edges_file_name = os.path.join(data_folder, file_name + ".json")
+    final_edges_file_name = os.path.join(input_dir, file_name + ".json")
+    sketch_data = modify_json(final_edges_file_name)
+    sketch_dimensions = (sketch_data["canvas_width"], sketch_data["canvas_height"])
+    final_edges_dict = sketch_data["strokes"]
     
-    with open(final_edges_file_name, "r") as fp:
-        sketch_data = json.load(fp)
-        sketch_dimensions = (sketch_data["canvas_width"], sketch_data["canvas_height"])
-        final_edges_dict = sketch_data["strokes"]
+    # with open(final_edges_file_name, "r") as fp:
+    #     sketch_data = json.load(fp)
+    #     sketch_dimensions = (sketch_data["canvas_width"], sketch_data["canvas_height"])
+    #     final_edges_dict = sketch_data["strokes"]
     
+    style_sheet_file_name = os.path.join("data/stylesheets", stylesheet_name+".json")
     with open(style_sheet_file_name, "r") as fp:
         stylesheet = json.load(fp)
 
@@ -128,8 +183,8 @@ if __name__ == "__main__":
         # stroke.svg_color = f"rgb({random.randint(0, 255)}, {random.randint(0, 255)}, {random.randint(0, 255)})"
         stroke.width = 2
 
-    out_npr_name = "npr_" + obj_data_name + ".svg"
-    npr_sketch_file_name = os.path.join(per_view_data_folder, out_npr_name)
+    out_npr_name = "npr_" + file_name + ".svg"
+    npr_sketch_file_name = os.path.join(output_dir, out_npr_name)
     skio.save(npr_sketch, npr_sketch_file_name)
     os.system("rsvg-convert -f pdf " + npr_sketch_file_name + " > " + npr_sketch_file_name.replace("svg", "pdf"))
     print("saved sketch in ", npr_sketch_file_name)
