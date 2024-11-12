@@ -277,6 +277,7 @@ def match_strokes(syn_sketch, stroke_dataset, opacity_profiles,
                     if len(s.points_list) > 3 and s.is_ellipse()]
     #ellipses_ids = [ellipses_ids[10]]
     #print("len(ellipses_ids)", len(ellipses_ids))
+    print("Match Strokes")
     for s_id, s in enumerate(syn_sketch.strokes):
         if optimize_stroke_length:
             stroke_distance = np.abs((1.0/scale_factor)*s.length() - stroke_lengths)
@@ -293,16 +294,22 @@ def match_strokes(syn_sketch, stroke_dataset, opacity_profiles,
         close_ids = []
         #print(close_ids)
         if optimize_stroke_length:
-            close_ids = straight_line_ids[np.random.choice(np.argsort(stroke_similarity_measure[straight_line_ids])[:100], 30)]
+            # close_ids = straight_line_ids[np.random.choice(np.argsort(stroke_similarity_measure[straight_line_ids])[:100], 30)] # LEO - REMOVED RANDOM SAMPLE
+            close_ids = straight_line_ids[np.argsort(stroke_similarity_measure[straight_line_ids])[:100]]
         else:
-            close_ids = straight_line_ids[np.random.choice(np.argsort(smoothness_terms[straight_line_ids])[:100], 30)]
+            # close_ids = straight_line_ids[np.random.choice(np.argsort(smoothness_terms[straight_line_ids])[:100], 30)]# LEO - REMOVED RANDOM SAMPLE
+            close_ids = straight_line_ids[np.argsort(smoothness_terms[straight_line_ids])[:100]]
         #if len(close_ids) == 0:
         #    close_ids = np.argwhere(np.abs(stroke_dataset_opacities - s.get_mean_data("pressure")) < 10.0*opacity_threshold).flatten()
         if s.is_curved():
+
             if optimize_stroke_length:
-                close_ids = curved_line_ids[np.random.choice(np.argsort(stroke_similarity_measure[curved_line_ids])[:100], 30)]
+                # close_ids = curved_line_ids[np.random.choice(np.argsort(stroke_similarity_measure[curved_line_ids])[:100], 30)]# LEO - REMOVED RANDOM SAMPLE
+                close_ids = curved_line_ids[np.argsort(stroke_similarity_measure[curved_line_ids])[:100]]
             else:
-                close_ids = curved_line_ids[np.random.choice(np.argsort(smoothness_terms[curved_line_ids])[:100], 30)]
+                # close_ids = curved_line_ids[np.random.choice(np.argsort(smoothness_terms[curved_line_ids])[:100], 30)] # LEO - REMOVED RANDOM SAMPLE
+                close_ids = curved_line_ids[np.argsort(smoothness_terms[curved_line_ids])[:100]] 
+        
             #close_ids = np.argwhere(np.abs(stroke_dataset_opacities - s.get_mean_data("pressure")) < opacity_threshold).flatten()
             #smoothness_terms = [stroke_dataset[i].smoothness for i in close_ids]
             #if len(close_ids) > 100:
@@ -371,8 +378,8 @@ def match_strokes(syn_sketch, stroke_dataset, opacity_profiles,
             max_dist_thresh = 10
             if s.is_ellipse():
                 max_dist_thresh = 5
-        #new_s_id = close_ids[np.random.choice(min_distances_ids[min_dist_thresh:max_dist_thresh], 1)[0]]
-        new_s_id = kept_ids[np.random.choice(min_distances_ids[min_dist_thresh:max_dist_thresh], 1)[0]]
+        #new_s_id = close_ids[np.random.choice(min_distances_ids[min_dist_thresh:max_dist_thresh], 1)[0]] # LEO - REMOVED RANDOM SAMPLE
+        new_s_id = kept_ids[min_distances_ids[min_dist_thresh:max_dist_thresh][0]]
         #if s.is_curved():
         #    #print(np.array(distances)[np.array(min_distances_ids)[:5]])
         #    new_s_id = kept_ids[min_distances_ids[0]]
@@ -524,8 +531,8 @@ def match_strokes(syn_sketch, stroke_dataset, opacity_profiles,
         #axes[2].axis("off")
         plt.show()
 
-    new_sketch.width = 1000
-    new_sketch.height = 1000
+    # new_sketch.width = 1000
+    # new_sketch.height = 1000
     for s in new_sketch.strokes:
         s.add_avail_data("pressure")
     return new_sketch
@@ -534,16 +541,22 @@ def match_strokes(syn_sketch, stroke_dataset, opacity_profiles,
 # stylesheet.keys():
 # category_name: {"opacity"}, {"overshooting"}
 
-def geometry_match(edges, stylesheet, cam_pos, obj_center, up_vec, display, clean_rendering=False, VERBOSE=False):
+# def geometry_match(edges, stylesheet, cam_pos, obj_center, up_vec, display, clean_rendering=False, VERBOSE=False):
+def geometry_match(edges, stylesheet, dimensions, clean_rendering=False, VERBOSE=False):
     #print(edges.keys())
     len_edges = len(edges.keys())
     sketch = Sketch()
+
+    sketch.width = dimensions[0]
+    sketch.height = dimensions[1]
+
     geometries = []
     for edge_id in range(len(edges.keys())):
         edge = edges[str(edge_id)]
         #print(edge)
         #print(edge["line_type"])
-        geometries.append(edge["geometry_3d"])
+        # geometries.append(edge["geometry_3d"])
+        geometries.append(edge["geometry"])
 
     # find out "style line types"
     max_feature_id = 0
@@ -566,9 +579,10 @@ def geometry_match(edges, stylesheet, cam_pos, obj_center, up_vec, display, clea
     #print("max_feature_id", max_feature_id)
     #projected_lines = project_points(geometries, cam_pos=cam_pos, obj_center=obj_center)
     #print(cam_pos, obj_center)
-    projected_lines = project_lines_opengl(geometries, display, cam_pos, obj_center, up_vec)
-    bbox_points = [p for l in projected_lines for p in l]
-    bbox = MultiPoint(bbox_points).bounds
+    # projected_lines = project_lines_opengl(geometries, display, cam_pos, obj_center, up_vec)
+    projected_lines = geometries
+    # bbox_points = [p for l in projected_lines for p in l]
+    # bbox = MultiPoint(bbox_points).bounds
     #print("sketch_bbox", bbox)
     #plt.show()
     #exit()
@@ -576,8 +590,8 @@ def geometry_match(edges, stylesheet, cam_pos, obj_center, up_vec, display, clea
     #stylesheet["opacities_per_type"]["scaffold"]["mu"] = 0.2
     #stylesheet["opacities_per_type"]["edges"]["mu"] = 0.7
     #stylesheet["opacities_per_type"]["silhouette"]["mu"] = 0.9
-    sketch.height = abs(bbox[2] - bbox[0])
-    sketch.width = abs(bbox[3] - bbox[1])
+    # sketch.height = abs(bbox[2] - bbox[0])
+    # sketch.width = abs(bbox[3] - bbox[1])
     #print(projected_lines)
     for l_id, l in enumerate(projected_lines):
         line_type = edges[str(l_id)]["line_type"]
@@ -627,8 +641,8 @@ def geometry_match(edges, stylesheet, cam_pos, obj_center, up_vec, display, clea
         axes.axis("off")
         plt.show()
 
-    sketch.width = 1000
-    sketch.height = 1000
+    # sketch.width = 1000
+    # sketch.height = 1000
     for s in sketch.strokes:
         s.add_avail_data("pressure")
     return sketch

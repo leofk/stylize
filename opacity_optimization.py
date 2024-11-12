@@ -13,11 +13,12 @@ import matplotlib.pyplot as plt
 import utils
 
 
-def optimize_opacities(edges, stylesheet, cam_pos, obj_center, up_vec, mesh, multiplicative=True, VERBOSE=False):
-    geometries = []
-    for edge_id in range(len(edges.keys())):
-        edge = edges[str(edge_id)]
-        geometries.append(edge["geometry_3d"])
+# def optimize_opacities(edges, stylesheet, cam_pos, obj_center, up_vec, mesh, multiplicative=True, VERBOSE=False):
+def optimize_opacities(edges, stylesheet):
+    # geometries = []
+    # for edge_id in range(len(edges.keys())):
+    #     edge = edges[str(edge_id)]
+    #     geometries.append(edge["geometry_3d"])
     # find out "style line types"
     max_feature_id = 0
     for s_id in range(len(edges)):
@@ -44,22 +45,22 @@ def optimize_opacities(edges, stylesheet, cam_pos, obj_center, up_vec, mesh, mul
     #    "silhouette_line": 1.0
     #}
     #old_opacities = [target_opacities[s_l] for s_l in style_labels]
-    print("style_labels")
+    print("Style Labels")
     for i, s in enumerate(style_labels):
         print(i, s)
 
-    if VERBOSE:
-        vis_lines_file_name = os.path.join(".", "vis_lines.svg")
-        indexed_lines_to_svg(deepcopy([{"geometry": edges[edge_id]["geometry_3d"],
-                                        "type": edges[edge_id]["type"],
-                                        "feature_id": edges[edge_id]["feature_id"]}
-                                       for edge_id in edges.keys()]),
-                                       [edge_id for edge_id in edges.keys() if style_labels[int(edge_id)] == "silhouette_line"],
-                             cam_pos, obj_center, up_vec,
-                             svg_file_name=vis_lines_file_name,
-                             title="Visible feature lines")
+    # if VERBOSE:
+    #     vis_lines_file_name = os.path.join(".", "vis_lines.svg")
+    #     indexed_lines_to_svg(deepcopy([{"geometry": edges[edge_id]["geometry_3d"],
+    #                                     "type": edges[edge_id]["type"],
+    #                                     "feature_id": edges[edge_id]["feature_id"]}
+    #                                    for edge_id in edges.keys()]),
+    #                                    [edge_id for edge_id in edges.keys() if style_labels[int(edge_id)] == "silhouette_line"],
+    #                          cam_pos, obj_center, up_vec,
+    #                          svg_file_name=vis_lines_file_name,
+    #                          title="Visible feature lines")
     old_opacities = []
-    print(stylesheet["opacities_per_type"])
+    # print(stylesheet["opacities_per_type"])
     for edge_id, s_l in enumerate(style_labels):
         mu = None
         sigma = None
