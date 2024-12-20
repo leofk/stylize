@@ -215,8 +215,7 @@ def overshoot_stroke(s, ratio=0.1):
     return new_s
 
 
-def match_strokes(syn_sketch, syn_sketch_2,
-                  stroke_dataset, opacity_profiles,
+def match_strokes(syn_sketch, stroke_dataset, opacity_profiles,
                   opacity_threshold=0.20,
                   straight_line_nearest_neighbor_range=[5, 15],
                   optimize_stroke_length=False,
@@ -225,17 +224,13 @@ def match_strokes(syn_sketch, syn_sketch_2,
                   VERBOSE=False):
     
 
+    plt.rcParams["figure.figsize"] = (20, 10)
     new_sketch = Sketch()
     new_sketch.height = syn_sketch.height
     new_sketch.width = syn_sketch.width
     new_sketch.strokes = []
 
-    new_sketch_2 = Sketch()
-    new_sketch_2.height = syn_sketch.height
-    new_sketch_2.width = syn_sketch.width
-    new_sketch_2.strokes = []
-
-    """ SETUP DATA """
+    # ---------------SETUP DATA---------------#
 
     # stroke_dataset_opacities = np.array([s.get_mean_data("pressure") for s in stroke_dataset])
     # median_opacities = [o["median_opacity"] for o in opacity_profiles]
@@ -278,32 +273,39 @@ def match_strokes(syn_sketch, syn_sketch_2,
     smoothness_terms -= np.min(smoothness_terms)
     smoothness_terms /= np.max(smoothness_terms)
 
+    #stroke_lengths = np.array([s.length() for s in stroke_dataset])
     ellipses_ids = [s_id for s_id, s in enumerate(stroke_dataset)
                     if len(s.points_list) > 3 and s.is_ellipse()]
+    #ellipses_ids = [ellipses_ids[10]]
+    #print("len(ellipses_ids)", len(ellipses_ids))
+
+    # ---------------FINISHED DATA---------------#
 
 
-    """ FIND MATCHING STYLE """
-    
+    print("Match Strokes")
     for s_id, s in enumerate(syn_sketch.strokes):
-
-        s2 = syn_sketch_2.strokes[s_id]
-
         if optimize_stroke_length:
             stroke_distance = np.abs((1.0/scale_factor)*s.length() - stroke_lengths)
             stroke_distance -= np.min(stroke_distance)
             stroke_distance /= np.max(stroke_distance)
             stroke_similarity_measure = 0.5*smoothness_terms + 0.5*stroke_distance
         opacity_multiplier = 1.0
-
+        print(s_id)
+        #if s_id > 30:
+        #    continue
+        overshooted_stroke = deepcopy(s)
+        distances = []
+        #close_ids = np.argwhere(np.abs(stroke_dataset_opacities - s.get_mean_data("pressure")) < opacity_threshold).flatten()
         close_ids = []
-
+        #print(close_ids)
         if optimize_stroke_length:
             # close_ids = straight_line_ids[np.random.choice(np.argsort(stroke_similarity_measure[straight_line_ids])[:100], 30)] # LEO - REMOVED RANDOM SAMPLE
             close_ids = straight_line_ids[np.argsort(stroke_similarity_measure[straight_line_ids])[:100]]
         else:
             # close_ids = straight_line_ids[np.random.choice(np.argsort(smoothness_terms[straight_line_ids])[:100], 30)]# LEO - REMOVED RANDOM SAMPLE
             close_ids = straight_line_ids[np.argsort(smoothness_terms[straight_line_ids])[:100]]
-        
+        #if len(close_ids) == 0:
+        #    close_ids = np.argwhere(np.abs(stroke_dataset_opacities - s.get_mean_data("pressure")) < 10.0*opacity_threshold).flatten()
         if s.is_curved():
 
             if optimize_stroke_length:
@@ -313,126 +315,232 @@ def match_strokes(syn_sketch, syn_sketch_2,
                 # close_ids = curved_line_ids[np.random.choice(np.argsort(smoothness_terms[curved_line_ids])[:100], 30)] # LEO - REMOVED RANDOM SAMPLE
                 close_ids = curved_line_ids[np.argsort(smoothness_terms[curved_line_ids])[:100]] 
         
+            #close_ids = np.argwhere(np.abs(stroke_dataset_opacities - s.get_mean_data("pressure")) < opacity_threshold).flatten()
+            #smoothness_terms = [stroke_dataset[i].smoothness for i in close_ids]
+            #if len(close_ids) > 100:
+            #    close_ids = np.random.choice(close_ids[np.argsort(smoothness_terms)][:100], 30)
         if s.is_ellipse():
+            #print("is_ellipse")
             close_ids = ellipses_ids
 
+        #if not s.is_curved():
+        #    close_ids = [i for i in close_ids if i in straight_line_ids]
+        #    if len(close_ids) > 20:
+        #        close_ids = np.random.choice(close_ids, 20)
+        #print(close_ids)
+        #print("len(close_ids)")
+        #print(len(close_ids))
 
-        """ TRANSFORM ORIGINAL TO MATCHED STYLE"""
-
-        overshooted_stroke = deepcopy(s)
-        overshooted_stroke_2 = deepcopy(s2)
-
-        distances = []
+        #if s.is_curved() and len(close_ids) > 100:
+        #    close_ids = np.random.choice(close_ids, 100)
+        #print(s.is_curved(), len(close_ids))
+        #exit()
+        #print(s.is_curved())
         kept_ids = []
-
         for other_s_id in close_ids:
             other_s = stroke_dataset[other_s_id]
-
             if (not s.is_curved() and other_s.is_curved()) or (s.is_curved() and not other_s.is_curved()):
+                #distances.append(100000.0)
                 continue
             if not s.is_ellipse() and other_s.is_ellipse():
                 continue
             if len(other_s.points_list) < 2:
+                #distances.append(100000.0)
                 continue
+            #if abs(s.get_mean_data("pressure") - other_s.get_mean_data("pressure")) > 0.2:
+            #    distances.append(100000.0)
+            #    continue
             if not s.is_curved():
                 new_other_s = match_two_strokes(overshooted_stroke, other_s)
             elif not s.is_ellipse():
+                #VERBOSE = s_id == 62
+                #new_other_s = match_two_strokes(overshooted_stroke, other_s, VERBOSE=VERBOSE)
                 new_other_s = match_two_strokes_homography(overshooted_stroke, other_s)
             else:
                 new_other_s = match_two_ellipses(overshooted_stroke, other_s)
+            #distances.append(new_other_s.linestring.linestring.hausdorff_distance(s.linestring.linestring))
             if new_other_s is None:
                 continue
-
             dist = new_other_s.linestring.linestring.hausdorff_distance(s.linestring.linestring)
+            #if not s.is_ellipse() and dist > 10.0:
+            #    continue
             distances.append(dist)
+            #chamfer_dist, pointwise_dists_1, pointwise_dists_2 = utils.chamfer_distance(np.array(new_other_s.linestring.linestring),
+            #                                                                            np.array(s.linestring.linestring),
+            #                                                                            return_pointwise_distances=True)
+            #distances.append(np.sum(pointwise_dists_1.flatten()) + np.sum(pointwise_dists_2.flatten()))
+            #distances.append(np.max(pointwise_dists_1.flatten()) + np.max(pointwise_dists_2.flatten()))
+            #distances.append(new_other_s.linestring.linestring.hausdorff_distance(s.linestring.linestring))
             kept_ids.append(other_s_id)
-            
+            #print(distances[-1])
         if len(kept_ids) == 0:
             continue
-
         min_distances_ids = np.argsort(distances)
-
         min_dist_thresh = min(len(distances), straight_line_nearest_neighbor_range[0])
-
         max_dist_thresh = straight_line_nearest_neighbor_range[1]
-
         if s.is_curved():
             min_dist_thresh = 0
             max_dist_thresh = 10
             if s.is_ellipse():
                 max_dist_thresh = 5
-
-        #new_s_id = close_ids[np.random.choice(min_distances_ids[min_dist_thresh:max_dist_thresh], 1)[0]] #  REMOVED RANDOM SAMPLE
+        #new_s_id = close_ids[np.random.choice(min_distances_ids[min_dist_thresh:max_dist_thresh], 1)[0]] # LEO - REMOVED RANDOM SAMPLE
         new_s_id = kept_ids[min_distances_ids[min_dist_thresh:max_dist_thresh][0]]
-
+        #if s.is_curved():
+        #    #print(np.array(distances)[np.array(min_distances_ids)[:5]])
+        #    new_s_id = kept_ids[min_distances_ids[0]]
+        #if s.is_curved():
+        #    print(s.length(), stroke_dataset[new_s_id].length())
         if not s.is_curved():
             new_other_s = match_two_strokes(overshooted_stroke, stroke_dataset[new_s_id])
-            new_other_s_2 = match_two_strokes(overshooted_stroke_2, stroke_dataset[new_s_id])
-
         elif not s.is_ellipse():
             new_other_s = match_two_strokes_homography(overshooted_stroke, stroke_dataset[new_s_id])
-            new_other_s_2 = match_two_strokes_homography(overshooted_stroke_2, stroke_dataset[new_s_id])
-
+            #print(new_other_s.linestring.linestring.hausdorff_distance(s.linestring.linestring))
         else:
+            #print("chosen ellipse", new_s_id)
             new_other_s = match_two_ellipses(overshooted_stroke, stroke_dataset[new_s_id])
-            new_other_s_2 = match_two_ellipses(overshooted_stroke_2, stroke_dataset[new_s_id])
-
-
             opacity_multiplier = stroke_dataset[new_s_id].opacity_multiplier
-
+        #for p_id in range(len(new_other_s.points_list)):
+        #    new_other_s.points_list[p_id].data["pressure"] = s.points_list[0].get_data("pressure")
         mean_opacity = np.mean([p.get_data("pressure") for p in s.points_list])
+        #print("opacity_multiplier", opacity_multiplier)
         mean_opacity = opacity_multiplier*mean_opacity
+        #mean_opacity = mean_opacity
+        #print(mean_opacity)
+        #closest_opacity_profile_id = np.argmin(np.abs(median_opacities - s.points_list[0].get_data("pressure")))
         closest_opacity_profile_id = np.argmin(np.abs(median_opacities - mean_opacity))
         closest_opacity_profile = np.array(opacity_profiles[closest_opacity_profile_id]["opacities"])
-
-
-        def process_geometry(stroke, closest_opacity_profile, mean_opacity):
-
-            coords = np.array([p.coords for p in stroke.points_list])
-            coords_ts = []
-            line = LineString(coords)
-            
-            for p_id in range(len(coords)):
-                p = coords[p_id]
-                t = line.project(Point(p), normalized=True)
-                coords_ts.append(t)
-            coords_ts = np.array(coords_ts)
-            
-            complex_coords = [complex(p[0], p[1]) for p in coords]
-            new_coords = np.array([
-                [p.real, p.imag] for p in np.interp(
-                    closest_opacity_profile[:, 0], coords_ts, complex_coords
-                )
-            ])
-            all_ts = np.array(coords_ts.tolist() + closest_opacity_profile[:, 0].tolist())
-            all_coords = np.array(coords.tolist() + new_coords.tolist())
-            new_all_coords = all_coords[np.argsort(all_ts)]
-            new_opacities = np.interp(
-                np.sort(all_ts), closest_opacity_profile[:, 0], closest_opacity_profile[:, 1]
-            )
-            
-            stroke.from_array(new_all_coords)
-            for p_id in range(len(stroke.points_list)):
-                stroke.points_list[p_id].data["pressure"] = new_opacities[p_id]
-                stroke.points_list[p_id].data["pressure"] = mean_opacity
-            
-            return stroke
-
-
-        new_other_s = process_geometry(new_other_s, closest_opacity_profile, mean_opacity)
-        new_other_s_2 = process_geometry(new_other_s_2, closest_opacity_profile, mean_opacity)
-
+        #print(closest_opacity_profile_id)
+        new_ts = []
+        #print(len(new_other_s.points_list))
+        #if len(new_other_s.points_list) == 0:
+        #    exit()
+        #new_l = LineString([p.coords for p in new_other_s.points_list])
+        coords = np.array([p.coords for p in new_other_s.points_list])
+        coords_ts = []
+        line = LineString(coords)
+        for p_id in range(len(coords)):
+            p = coords[p_id]
+            t = line.project(Point(p), normalized=True)
+            coords_ts.append(t)
+        coords_ts = np.array(coords_ts)
+        complex_coords = [complex(p[0], p[1]) for p in coords]
+        new_coords = np.array([[p.real, p.imag]
+                               for p in np.interp(closest_opacity_profile[:, 0], coords_ts, complex_coords)])
+        all_ts = np.array(coords_ts.tolist() + closest_opacity_profile[:, 0].tolist())
+        all_coords = np.array(coords.tolist() + new_coords.tolist())
+        new_all_coords = all_coords[np.argsort(all_ts)]
+        #for p_id in range(len(new_other_s.points_list)):
+        #    p = new_other_s.points_list[p_id]
+        #    #t = new_other_s.linestring.linestring.project(Point(p.coords), normalized=True)
+        #    t = new_other_s.linestring.linestring.project(Point(p.coords), normalized=True)
+        #    new_ts.append(t)
+        #new_opacities = np.interp(new_ts, closest_opacity_profile[:, 0], closest_opacity_profile[:, 1])
+        new_opacities = np.interp(np.sort(all_ts), closest_opacity_profile[:, 0], closest_opacity_profile[:, 1])
+        #print(all_coords)
+        new_other_s.from_array(new_all_coords)
+        #print("mean_opacity", mean_opacity)
+        for p_id in range(len(new_other_s.points_list)):
+            new_other_s.points_list[p_id].data["pressure"] = new_opacities[p_id]
+            new_other_s.points_list[p_id].data["pressure"] = mean_opacity
         new_sketch.strokes.append(new_other_s)
-        new_sketch_2.strokes.append(new_other_s_2)
+        #if s_id == 7:
+        #print([p.get_data("pressure") for p in new_other_s.points_list])
+        #if len([p.get_data("pressure") for p in new_other_s.points_list]) == 0:
+        #    exit()
+        #    print(s.points_list[0].get_data("pressure"))
+        #    print(closest_opacity_profile[:, 0])
+        #    print(closest_opacity_profile[:, 1])
+        #    print(new_opacities)
+        #    exit()
 
 
+        #if s_id == 62:
+        #    fig, axes = plt.subplots(nrows=1, ncols=1)
+
+        #    fig.subplots_adjust(wspace=0.0, hspace=1.0, left=0.0, right=1.0,
+        #                        bottom=0.0,
+        #                        top=1.0)
+        #    axes.plot(np.array(s.linestring.linestring)[:, 0],
+        #              np.array(s.linestring.linestring)[:, 1], c="red", lw=2)
+        #    axes.plot(np.array(stroke_dataset[new_s_id].linestring.linestring)[:, 0],
+        #              np.array(stroke_dataset[new_s_id].linestring.linestring)[:, 1], c="blue")
+        #    axes.plot(np.array(new_other_s.linestring.linestring)[:, 0],
+        #              np.array(new_other_s.linestring.linestring)[:, 1], c="green")
+        #    print(np.array(distances)[np.array(min_distances_ids)[:10]])
+        #    chamfer_dist, pointwise_dists_1, pointwise_dists_2 = utils.chamfer_distance(np.array(new_other_s.linestring.linestring),
+        #                                                                                np.array(s.linestring.linestring),
+        #                                                                                return_pointwise_distances=True)
+        #    print(pointwise_dists_1.flatten(), pointwise_dists_2.flatten())
+        #    print(s_id, new_s_id)
+        #    plt.axis("equal")
+        #    plt.show()
+
+        #new_sketch.strokes.append(s)
+        #syn_sketch.strokes[s_id] = overshooted_stroke
+
+    # if VERBOSE:
+
+    #     fig, axes = plt.subplots(nrows=1, ncols=2)
+
+    #     fig.subplots_adjust(wspace=0.0, hspace=1.0, left=0.0, right=1.0,
+    #                         bottom=0.0,
+    #                         top=1.0)
+
+    #     #syn_sketch.strokes.append(other_s_copied_stroke)
+    #     #print(other_s_copied)
+    #     #print([p.coords for p in syn_sketch.strokes[-1].points_list])
+    #     #new_display_strokes = np.arange(len(syn_sketch.strokes)).tolist()
+    #     #new_display_strokes.remove(s_id)
+    #     #print(new_display_strokes)
+
+    #     syn_sketch.display_strokes_2(fig=fig, ax=axes[0],
+    #                                  linewidth_data=lambda p: p.get_data("pressure")+0.5,
+    #                                  color_process=lambda s: [(0, 0, 0, p.get_data("pressure"))
+    #                                                           for p in s.points_list])
+    #     #syn_sketch.display_strokes_2(fig=fig, ax=axes[0],
+    #     #                             color_process=lambda s: "red",
+    #     #                             display_strokes=[s_id])
+
+    #     new_sketch.display_strokes_2(fig=fig, ax=axes[1],
+    #                                  linewidth_data=lambda p: p.get_data("pressure")+0.5,
+    #                                  color_process=lambda s: [(0, 0, 0, p.get_data("pressure"))
+    #                                                           for p in s.points_list])
+    #     #new_sketch.display_strokes_2(fig=fig, ax=axes[1],
+    #     #                              color_process=lambda s: "red",
+    #     #                              display_strokes=[other_s_id])
+    #     #axes[0].plot(other_s_transformed[:, 0], other_s_transformed[:, 1], c="green")
+    #     #axes[0].plot(other_s_points[:, 0], other_s_points[:, 1], c="blue")
+    #     #axes[0].plot(other_s_copied[:, 0], other_s_copied[:, 1], c="green",
+    #     #             lw=other_s.get)
+    #     #orig_sketch.display_strokes_2(fig=fig, ax=axes[2],
+    #     #                              linewidth_data=lambda p: p.get_data("pressure")+0.5,
+    #     #                              color_process=lambda s: [(0, 0, 0, p.get_data("pressure"))
+    #     #                                                       for p in s.points_list])
+
+    #     axes[0].set_xlim(0, syn_sketch.width)
+    #     axes[0].set_ylim(syn_sketch.height, 0)
+    #     axes[0].axis("equal")
+    #     axes[0].axis("off")
+    #     x_lim = axes[0].get_xlim()
+    #     y_lim = axes[0].get_ylim()
+
+    #     axes[1].set_xlim(x_lim)
+    #     axes[1].set_ylim(y_lim)
+    #     axes[1].axis("equal")
+    #     axes[1].axis("off")
+    #     plt.gca().invert_yaxis()
+
+    #     #axes[2].set_xlim(0, orig_sketch.width)
+    #     #axes[2].set_ylim(orig_sketch.height, 0)
+    #     #axes[2].axis("equal")
+    #     #axes[2].axis("off")
+    #     plt.show()
+
+    # new_sketch.width = 1000
+    # new_sketch.height = 1000
     for s in new_sketch.strokes:
         s.add_avail_data("pressure")
-
-    for s in new_sketch_2.strokes:
-        s.add_avail_data("pressure")
-
-    return new_sketch, new_sketch_2
+    return new_sketch
 
 
 # stylesheet.keys():

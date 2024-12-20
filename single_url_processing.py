@@ -3,7 +3,7 @@ import pickle
 import json
 import os, sys
 from opacity_optimization import optimize_opacities
-from line_rendering import geometry_match, match_strokes, get_stroke_dataset, perturbate_sketch, get_opacity_profiles
+from line_rendering import geometry_match, geometry_match_dual, match_strokes, get_stroke_dataset, perturbate_sketch, get_opacity_profiles
 from pylowstroke.sketch_io import SketchSerializer as skio
 sys.setrecursionlimit(10000)
 import logging
@@ -71,33 +71,46 @@ if __name__ == "__main__":
     parser.add_argument("--stylesheet_name", default="", type=str, help="stylesheet file path")
     parser.add_argument("--match_stroke_length", default="True", type=str, help="Render drawing in a concept sketch style")
     
-    parser.add_argument("--output_dir",  default="", type=str, help="data_folder path")
-    parser.add_argument("--input_dir",  default="", type=str, help="data_folder path")
-    parser.add_argument("--file_name",  default="", type=str, help="data_folder path")
+    
+    parser.add_argument("--dir_1",  default="", type=str, help="data_folder path")
+    parser.add_argument("--file_1",  default="", type=str, help="data_folder path")
+
+    parser.add_argument("--dir_2",  default="", type=str, help="data_folder path")
+    parser.add_argument("--file_2",  default="", type=str, help="data_folder path")
 
     args = parser.parse_args()
-
 
     match_stroke_length = args.match_stroke_length == "True"
     stylesheet_name = args.stylesheet_name
     stroke_dataset_designer_name = args.designer
 
-    data_folder = args.data_folder
-    edge_data = args.data_file
+    input_prefix = "../scratch/synthetic/"
+    output_prefix = "../scratch/npr/"
 
-    output_dir = args.output_dir
-    input_dir = args.input_dir
-    file_name = args.file_name
+    intput_dir_1 = input_prefix + args.dir_1
+    intput_dir_2 = input_prefix + args.dir_2
+    
+    output_dir_1 = output_prefix + args.dir_1
+    output_dir_2 = output_prefix + args.dir_2
+
+    file_name_1 = args.file_1
+    file_name_2 = args.file_2
 
 
     print("NPR_RENDERING")
     start_time = time()
 
-    final_edges_file_name = os.path.join(input_dir, file_name + ".json")
+    final_edges_file_name = os.path.join(intput_dir_1, file_name_1 + ".json")
     sketch_data = modify_json(final_edges_file_name)
     sketch_dimensions = (sketch_data["canvas_width"], sketch_data["canvas_height"])
     final_edges_dict = sketch_data["strokes"]
     
+    final_edges_file_name_2 = os.path.join(intput_dir_2, file_name_2 + ".json")
+    sketch_data_2 = modify_json(final_edges_file_name_2)
+    sketch_dimensions_2 = (sketch_data_2["canvas_width"], sketch_data_2["canvas_height"])
+    final_edges_dict_2 = sketch_data_2["strokes"]
+    
+
     style_sheet_file_name = os.path.join("data/stylesheets", stylesheet_name+".json")
     with open(style_sheet_file_name, "r") as fp:
         stylesheet = json.load(fp)
@@ -130,23 +143,29 @@ if __name__ == "__main__":
 
 
     # add some overksetching to contours
-    syn_sketch = geometry_match(final_edges_dict, stylesheet, sketch_dimensions)
+    
+    # syn_sketch = geometry_match(final_edges_dict, stylesheet, sketch_dimensions)
+    syn_sketch, syn_sketch_2 = geometry_match_dual(final_edges_dict, final_edges_dict_2, stylesheet, sketch_dimensions)
     
 
     for s_id in range(len(syn_sketch.strokes)):
         for p_id in range(len(syn_sketch.strokes[s_id].points_list)):
             syn_sketch.strokes[s_id].points_list[p_id].add_data("pressure", new_opacities[s_id])
 
+    for s_id in range(len(syn_sketch_2.strokes)):
+        for p_id in range(len(syn_sketch_2.strokes[s_id].points_list)):
+            syn_sketch.strokes[s_id].points_list[p_id].add_data("pressure", new_opacities[s_id])
 
     #subdivide_long_curves(syn_sketch, VERBOSE=True)
     # DEBUG
 
     # adding random perturbations to the straight strokes
-    syn_sketch = perturbate_sketch(syn_sketch)
+    # syn_sketch = perturbate_sketch(syn_sketch)
 
     # aligning synthetic sketch strokes (syn_sketch) with real-world strokes (stroke_dataset) 
     # based on several criteria, including stroke smoothness, length, and opacity.
-    npr_sketch = match_strokes(syn_sketch, stroke_dataset, opacity_profiles,
+    npr_sketch, npr_sketch_2 = match_strokes(syn_sketch, syn_sketch_2,
+                               stroke_dataset, opacity_profiles,
                                 opacity_threshold=0.1,
                                 straight_line_nearest_neighbor_range=[0, 10],
                                 target_smoothness=0.3,
@@ -158,12 +177,26 @@ if __name__ == "__main__":
         # stroke.svg_color = f"rgb({random.randint(0, 255)}, {random.randint(0, 255)}, {random.randint(0, 255)})"
         stroke.width = 2
 
-    os.makedirs(output_dir, exist_ok=True)
-    out_npr_name = "npr_" + file_name + ".svg"
-    npr_sketch_file_name = os.path.join(output_dir, out_npr_name)
-    skio.save(npr_sketch, npr_sketch_file_name)
-    os.system("rsvg-convert -f pdf " + npr_sketch_file_name + " > " + npr_sketch_file_name.replace("svg", "pdf"))
-    print("saved sketch in ", npr_sketch_file_name)
+    for stroke in npr_sketch_2.strokes:
+        # stroke.svg_color = f"rgb({random.randint(0, 255)}, {random.randint(0, 255)}, {random.randint(0, 255)})"
+        stroke.width = 2
 
+    os.makedirs(output_dir_1, exist_ok=True)
+    os.makedirs(output_dir_2, exist_ok=True)
+
+    out_npr_name = "npr_" + file_name_1 + ".svg"
+    out_npr_name_2 = "npr_" + file_name_2 + ".svg"
+
+    npr_sketch_file_name = os.path.join(output_dir_1, out_npr_name)
+    npr_sketch_file_name_2 = os.path.join(output_dir_2, out_npr_name_2)
+
+
+    skio.save(npr_sketch, npr_sketch_file_name)
+    skio.save(npr_sketch_2, npr_sketch_file_name_2)
+
+    # os.system("rsvg-convert -f pdf " + npr_sketch_file_name + " > " + npr_sketch_file_name.replace("svg", "pdf"))
+    # os.system("rsvg-convert -f pdf " + npr_sketch_file_name_2 + " > " + npr_sketch_file_name_2.replace("svg", "pdf"))
+
+    # print("saved sketch in ", npr_sketch_file_name)
     print("stylization_time", time() - start_time)
 
