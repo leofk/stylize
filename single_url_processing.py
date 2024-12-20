@@ -154,7 +154,7 @@ if __name__ == "__main__":
 
     for s_id in range(len(syn_sketch_2.strokes)):
         for p_id in range(len(syn_sketch_2.strokes[s_id].points_list)):
-            syn_sketch.strokes[s_id].points_list[p_id].add_data("pressure", new_opacities[s_id])
+            syn_sketch_2.strokes[s_id].points_list[p_id].add_data("pressure", new_opacities[s_id])
 
     #subdivide_long_curves(syn_sketch, VERBOSE=True)
     # DEBUG
