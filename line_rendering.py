@@ -300,7 +300,7 @@ def match_strokes(syn_sketch, syn_sketch_2,
         if optimize_stroke_length:
             # close_ids = straight_line_ids[np.random.choice(np.argsort(stroke_similarity_measure[straight_line_ids])[:100], 30)] # LEO - REMOVED RANDOM SAMPLE
             close_ids = straight_line_ids[np.argsort(stroke_similarity_measure[straight_line_ids])[:100]]
-            print(f"stroke {s_id} is a LINE.\n")
+            # print(f"stroke {s_id} is a LINE.\n")
         else:
             # close_ids = straight_line_ids[np.random.choice(np.argsort(smoothness_terms[straight_line_ids])[:100], 30)]# LEO - REMOVED RANDOM SAMPLE
             close_ids = straight_line_ids[np.argsort(smoothness_terms[straight_line_ids])[:100]]
@@ -308,12 +308,12 @@ def match_strokes(syn_sketch, syn_sketch_2,
         if s.is_curved():
 
             if optimize_stroke_length:
-                print(f"stroke {s_id} is a CURVE.\n")
+                # print(f"stroke {s_id} is a CURVE.\n")
 
                 # close_ids = curved_line_ids[np.random.choice(np.argsort(stroke_similarity_measure[curved_line_ids])[:100], 30)]# LEO - REMOVED RANDOM SAMPLE
                 close_ids = curved_line_ids[np.argsort(stroke_similarity_measure[curved_line_ids])[:100]]
             else:
-                print(f"stroke {s_id} is a ELLIPSE.\n")
+                # print(f"stroke {s_id} is a ELLIPSE.\n")
                 # close_ids = curved_line_ids[np.random.choice(np.argsort(smoothness_terms[curved_line_ids])[:100], 30)] # LEO - REMOVED RANDOM SAMPLE
                 close_ids = curved_line_ids[np.argsort(smoothness_terms[curved_line_ids])[:100]] 
         
@@ -366,8 +366,8 @@ def match_strokes(syn_sketch, syn_sketch_2,
             if s.is_ellipse():
                 max_dist_thresh = 5
 
-        new_s_id = kept_ids[np.random.choice(min_distances_ids[min_dist_thresh:max_dist_thresh], 1)[0]]
-        # new_s_id = kept_ids[min_distances_ids[min_dist_thresh:max_dist_thresh][0]]
+        # new_s_id = kept_ids[np.random.choice(min_distances_ids[min_dist_thresh:max_dist_thresh], 1)[0]]
+        new_s_id = kept_ids[min_distances_ids[min_dist_thresh:max_dist_thresh][0]]
 
         if not s.is_curved():
             new_other_s = match_two_strokes(overshooted_stroke, stroke_dataset[new_s_id])
