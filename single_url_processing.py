@@ -192,7 +192,7 @@ if __name__ == "__main__":
 
 
     skio.save(npr_sketch, npr_sketch_file_name)
-    # skio.save(npr_sketch_2, npr_sketch_file_name_2)
+    skio.save(npr_sketch_2, npr_sketch_file_name_2)
 
     # os.system("rsvg-convert -f pdf " + npr_sketch_file_name + " > " + npr_sketch_file_name.replace("svg", "pdf"))
     # os.system("rsvg-convert -f pdf " + npr_sketch_file_name_2 + " > " + npr_sketch_file_name_2.replace("svg", "pdf"))
