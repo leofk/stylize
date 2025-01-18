@@ -173,13 +173,13 @@ if __name__ == "__main__":
                                 optimize_stroke_length=match_stroke_length)
     
 
-    for stroke in npr_sketch.strokes:
-        # stroke.svg_color = f"rgb({random.randint(0, 255)}, {random.randint(0, 255)}, {random.randint(0, 255)})"
-        stroke.width = 2
+    # for stroke in npr_sketch.strokes:
+    #     # stroke.svg_color = f"rgb({random.randint(0, 255)}, {random.randint(0, 255)}, {random.randint(0, 255)})"
+    #     stroke.width = 2
 
-    for stroke in npr_sketch_2.strokes:
-        # stroke.svg_color = f"rgb({random.randint(0, 255)}, {random.randint(0, 255)}, {random.randint(0, 255)})"
-        stroke.width = 2
+    # for stroke in npr_sketch_2.strokes:
+    #     # stroke.svg_color = f"rgb({random.randint(0, 255)}, {random.randint(0, 255)}, {random.randint(0, 255)})"
+    #     stroke.width = 2
 
     os.makedirs(output_dir_1, exist_ok=True)
     os.makedirs(output_dir_2, exist_ok=True)
