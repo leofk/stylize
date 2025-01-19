@@ -297,28 +297,28 @@ def match_strokes(syn_sketch, syn_sketch_2,
 
         close_ids = []
 
-        num_best=30
+        num_best=50
         topk=20
 
         if optimize_stroke_length:
-            close_ids = straight_line_ids[np.random.choice(np.argsort(stroke_similarity_measure[straight_line_ids])[:num_best], topk)] # LEO - REMOVED RANDOM SAMPLE
-            # close_ids = straight_line_ids[np.argsort(stroke_similarity_measure[straight_line_ids])[:num_best]]
+            # close_ids = straight_line_ids[np.random.choice(np.argsort(stroke_similarity_measure[straight_line_ids])[:num_best], topk)] # LEO - REMOVED RANDOM SAMPLE
+            close_ids = straight_line_ids[np.argsort(stroke_similarity_measure[straight_line_ids])[:num_best]]
             # print(f"stroke {s_id} is a LINE.\n")
         else:
-            close_ids = straight_line_ids[np.random.choice(np.argsort(smoothness_terms[straight_line_ids])[:num_best], topk)]# LEO - REMOVED RANDOM SAMPLE
-            # close_ids = straight_line_ids[np.argsort(smoothness_terms[straight_line_ids])[:num_best]]
+            # close_ids = straight_line_ids[np.random.choice(np.argsort(smoothness_terms[straight_line_ids])[:num_best], topk)]# LEO - REMOVED RANDOM SAMPLE
+            close_ids = straight_line_ids[np.argsort(smoothness_terms[straight_line_ids])[:num_best]]
         
         if s.is_curved():
 
             if optimize_stroke_length:
                 # print(f"stroke {s_id} is a CURVE.\n")
 
-                close_ids = curved_line_ids[np.random.choice(np.argsort(stroke_similarity_measure[curved_line_ids])[:num_best], topk)]# LEO - REMOVED RANDOM SAMPLE
-                # close_ids = curved_line_ids[np.argsort(stroke_similarity_measure[curved_line_ids])[:num_best]]
+                # close_ids = curved_line_ids[np.random.choice(np.argsort(stroke_similarity_measure[curved_line_ids])[:num_best], topk)]# LEO - REMOVED RANDOM SAMPLE
+                close_ids = curved_line_ids[np.argsort(stroke_similarity_measure[curved_line_ids])[:num_best]]
             else:
                 # print(f"stroke {s_id} is a ELLIPSE.\n")
-                close_ids = curved_line_ids[np.random.choice(np.argsort(smoothness_terms[curved_line_ids])[:num_best], topk)] # LEO - REMOVED RANDOM SAMPLE
-                # close_ids = curved_line_ids[np.argsort(smoothness_terms[curved_line_ids])[:num_best]] 
+                # close_ids = curved_line_ids[np.random.choice(np.argsort(smoothness_terms[curved_line_ids])[:num_best], topk)] # LEO - REMOVED RANDOM SAMPLE
+                close_ids = curved_line_ids[np.argsort(smoothness_terms[curved_line_ids])[:num_best]] 
         
         if s.is_ellipse():
             close_ids = ellipses_ids
