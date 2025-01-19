@@ -35,8 +35,9 @@ def modify_json(input_file_path):
                 y = canvas_height - ((-point["y"] + 1.0) / 2.0 * canvas_height)
                 geometry.append([x, y])
 
-            stroke_type = "silhouette_line"  # Modify if needed
-            line_type = "silhouette_line"    # Modify if needed
+            typeline = "feature_line"
+            stroke_type = typeline  # Modify if needed
+            line_type = typeline    # Modify if needed
             feature_id = 1
             labels = [{"type": stroke_type, "feature_id": feature_id}]
             visibility_score = 1.0
