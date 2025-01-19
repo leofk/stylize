@@ -35,7 +35,7 @@ def modify_json(input_file_path):
                 y = canvas_height - ((-point["y"] + 1.0) / 2.0 * canvas_height)
                 geometry.append([x, y])
 
-            typeline = "sketch"
+            typeline = "silhouette_line"
             stroke_type = typeline  # Modify if needed
             line_type = typeline    # Modify if needed
             feature_id = 1
