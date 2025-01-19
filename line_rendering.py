@@ -369,8 +369,8 @@ def match_strokes(syn_sketch, syn_sketch_2,
             if s.is_ellipse():
                 max_dist_thresh = 5
 
-        new_s_id = kept_ids[np.random.choice(min_distances_ids[min_dist_thresh:max_dist_thresh], 1)[0]]
-        # new_s_id = kept_ids[min_distances_ids[min_dist_thresh:max_dist_thresh][0]]
+        # new_s_id = kept_ids[np.random.choice(min_distances_ids[min_dist_thresh:max_dist_thresh], 1)[0]]
+        new_s_id = kept_ids[min_distances_ids[min_dist_thresh:max_dist_thresh][0]]
 
         if not s.is_curved():
             new_other_s = match_two_strokes(overshooted_stroke, stroke_dataset[new_s_id])
