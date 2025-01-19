@@ -297,8 +297,8 @@ def match_strokes(syn_sketch, syn_sketch_2,
 
         close_ids = []
 
-        num_best=50
-        topk=30
+        num_best=30
+        topk=20
 
         if optimize_stroke_length:
             close_ids = straight_line_ids[np.random.choice(np.argsort(stroke_similarity_measure[straight_line_ids])[:num_best], topk)] # LEO - REMOVED RANDOM SAMPLE
