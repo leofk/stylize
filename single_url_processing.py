@@ -125,7 +125,8 @@ if __name__ == "__main__":
         with open(stroke_dataset_name, "wb") as fp:
             pickle.dump(stroke_dataset, fp)
 
-    opacity_profiles_name = os.path.join("data/opacity_profiles", stroke_dataset_designer_name+".json")
+    opacity_profiles_name = os.path.join("data/opacity_profiles", "student8.json")
+    # opacity_profiles_name = os.path.join("data/opacity_profiles", stroke_dataset_designer_name+"student8.json")
     if os.path.exists(opacity_profiles_name):
         with open(opacity_profiles_name, "r") as fp:
             opacity_profiles = json.load(fp)
